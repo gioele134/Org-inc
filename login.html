@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Login - Disponibilità Lavorative</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+
+  <main class="login-container">
+    <h2>Accedi alla piattaforma</h2>
+
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <div class="errore">
+          {% for message in messages %}
+            <p>{{ message }}</p>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+
+    <form action="/login" method="POST">
+      <label for="username">Nome utente</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Password</label>
+      <input type="password" id="password" name="password" required>
+
+      <button type="submit">Login</button>
+    </form>
+
+    <p>Le credenziali di accesso sono fornite dall’amministratore.</p>
+  </main>
+
+</body>
+</html>

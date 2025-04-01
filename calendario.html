@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Calendario Disponibilità</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+  <header>
+    <h1>Calendario Disponibilità</h1>
+    <p>Benvenuto, {{ username }}</p>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </header>
+
+  <main>
+    <p>Qui verrà visualizzato il calendario con le disponibilità.</p>
+    <!-- Prossimo step: inserire calendario reale -->
+  </main>
+</body>
+</html>
