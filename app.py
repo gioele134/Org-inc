@@ -3,11 +3,11 @@ import json
 from pathlib import Path
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  # cambia per la produzione
+app.secret_key = 'supersecretkey'  # cambia con una chiave sicura in produzione
 
 FILE_DISPONIBILITA = Path("disponibilita.json")
 
-# ------------------- Funzioni di utilità -------------------
+# ------------------- Utilità -------------------
 
 def carica_disponibilita():
     if FILE_DISPONIBILITA.exists():
@@ -19,7 +19,7 @@ def salva_disponibilita(dati):
     with open(FILE_DISPONIBILITA, "w") as f:
         json.dump(dati, f)
 
-# ------------------- LOGIN & SESSIONE -------------------
+# ------------------- Login / Logout -------------------
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
@@ -27,7 +27,7 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        # Qui potresti validare username e password da un file o dizionario
+        # Per ora accettiamo qualsiasi combinazione
         if username and password:
             session['username'] = username
             return redirect(url_for('calendario'))
@@ -40,7 +40,7 @@ def logout():
     session.clear()
     return redirect(url_for('login'))
 
-# ------------------- CALENDARIO -------------------
+# ------------------- Calendario -------------------
 
 @app.route('/calendario')
 def calendario():
@@ -48,7 +48,7 @@ def calendario():
         return redirect(url_for('login'))
     return render_template('calendario.html', username=session['username'])
 
-# ------------------- API: GET disponibilità -------------------
+# ------------------- API: Dati disponibilità -------------------
 
 @app.route('/dati_disponibilita')
 def dati_disponibilita():
@@ -60,7 +60,7 @@ def dati_disponibilita():
         "confermate": confermate
     })
 
-# ------------------- API: POST aggiorna disponibilità -------------------
+# ------------------- API: Aggiorna disponibilità -------------------
 
 @app.route('/aggiorna_disponibilita', methods=['POST'])
 def aggiorna_disponibilita():
