@@ -2,105 +2,138 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Calendario Disponibilità</title>
+  <title>Settimana Disponibilità</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
 
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
       padding: 0;
-    }
-
-    #calendar {
-      max-width: 100%;
-      margin: 10px auto;
-      padding: 0 5px;
+      text-align: center;
+      background-color: #f9f9f9;
     }
 
     header {
-      text-align: center;
-      padding: 10px 5px;
+      padding: 10px;
+      background-color: #0077cc;
+      color: white;
     }
 
     a {
-      display: inline-block;
-      margin-top: 10px;
+      color: white;
+      text-decoration: underline;
     }
 
-    .fc-daygrid-day {
-      height: 80px !important; /* rende i quadratini più piccoli e visibili su smartphone */
+    .settimana {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      padding: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .giorno {
+      padding: 30px 10px;
+      border-radius: 8px;
+      color: #000;
+      font-weight: bold;
+      background-color: rgba(0, 128, 0, 0.1); /* verde 10% */
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+
+    .giorno.disponibilita-2 {
+      background-color: rgba(255, 165, 0, 0.1); /* arancione 10% */
+    }
+
+    .giorno:hover {
+      cursor: pointer;
+      opacity: 0.9;
+    }
+
+    .domenica {
+      grid-column: span 2;
+      background-color: red !important;
+      color: white;
+      padding: 15px;
+      height: 50px;
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Calendario Disponibilità</h1>
+    <h2>Disponibilità Settimanale</h2>
     <p>Benvenuto, {{ username }}</p>
     <a href="{{ url_for('logout') }}">Logout</a>
   </header>
 
-  <main>
-    <div id="calendar"></div>
-  </main>
+  <div class="settimana" id="griglia">
+    <!-- I 7 blocchi saranno generati da JavaScript -->
+  </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const calendarEl = document.getElementById('calendar');
-      const disponibilita = new Set();
+    const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+    const disponibilita = {};
+    const oggi = new Date();
+    const lunedi = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
 
-      // Limita la selezione a un range di 4 settimane a partire da oggi
-      const oggi = new Date();
-      const inizio = new Date(oggi);
-      inizio.setDate(oggi.getDate() - oggi.getDay()); // lunedì di questa settimana
-      const fine = new Date(oggi);
-      fine.setDate(oggi.getDate() + (7 * 4)); // 4 settimane avanti
+    function formatData(date) {
+      return date.toISOString().split('T')[0];
+    }
 
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridWeek',
-        validRange: {
-          start: inizio.toISOString().split('T')[0],
-          end: fine.toISOString().split('T')[0]
-        },
-        headerToolbar: {
-          left: 'prev,next',
-          center: 'title',
-          right: ''
-        },
-        locale: 'it',
-        selectable: true,
-        dateClick: function (info) {
-          const data = info.dateStr;
+    function creaGriglia() {
+      const container = document.getElementById('griglia');
+      container.innerHTML = '';
 
-          if (info.date < inizio || info.date >= fine) {
-            alert("Non puoi selezionare questa data.");
-            return;
+      for (let i = 0; i < 7; i++) {
+        const giornoData = new Date(lunedi);
+        giornoData.setDate(lunedi.getDate() + i);
+        const dataStr = formatData(giornoData);
+
+        const div = document.createElement('div');
+        div.classList.add('giorno');
+        div.textContent = `${giorni[i]} (${dataStr})`;
+
+        if (i === 6) {
+          div.classList.add('domenica');
+        } else {
+          if (disponibilita[dataStr] === 2) {
+            div.classList.add('disponibilita-2');
           }
 
-          if (disponibilita.has(data)) {
-            disponibilita.delete(data);
-            info.dayEl.style.backgroundColor = '';
-          } else {
-            disponibilita.add(data);
-            info.dayEl.style.backgroundColor = '#00cc66';
-          }
+          div.addEventListener('click', () => {
+            if (!disponibilita[dataStr]) {
+              disponibilita[dataStr] = 1;
+            } else if (disponibilita[dataStr] < 2) {
+              disponibilita[dataStr]++;
+            }
 
-          fetch('/aggiorna_disponibilita', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-              data: data,
-              disponibile: disponibilita.has(data)
-            })
+            creaGriglia(); // aggiorna grafica
+
+            fetch('/aggiorna_disponibilita', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                data: dataStr,
+                disponibilita: disponibilita[dataStr]
+              })
+            });
           });
         }
-      });
 
-      calendar.render();
+        container.appendChild(div);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+      const res = await fetch('/dati_disponibilita');
+      const dati = await res.json();
+      Object.assign(disponibilita, dati);
+      creaGriglia();
     });
   </script>
 </body>
