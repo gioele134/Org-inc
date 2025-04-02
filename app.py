@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import os
-
+import json
+from pathlib import Path
 app = Flask(__name__)
 app.secret_key = 'sostituisci_questa_con_una_chiave_sicura'
 
@@ -38,6 +39,34 @@ def calendario():
 def logout():
     session.pop('username', None)
     return redirect(url_for('login'))
+
+FILE_DISPONIBILITA = Path("disponibilita.json")
+
+def carica_disponibilita():
+    if FILE_DISPONIBILITA.exists():
+        with open(FILE_DISPONIBILITA, "r") as f:
+            return json.load(f)
+    return {}
+
+def salva_disponibilita(dati):
+    with open(FILE_DISPONIBILITA, "w") as f:
+        json.dump(dati, f)
+
+@app.route('/aggiorna_disponibilita', methods=['POST'])
+def aggiorna_disponibilita():
+    dati = request.get_json()
+    data = dati.get('data')
+    valore = dati.get('disponibilita')
+
+    tutte = carica_disponibilita()
+    tutte[data] = valore
+    salva_disponibilita(tutte)
+
+    return jsonify({"status": "ok"})
+
+@app.route('/dati_disponibilita')
+def dati_disponibilita():
+    return jsonify(carica_disponibilita())
 
 @app.route('/aggiorna_disponibilita', methods=['POST'])
 def aggiorna_disponibilita():
