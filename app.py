@@ -1,19 +1,18 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import json
-from datetime import datetime
 import os
+from datetime import datetime
 
 app = Flask(__name__)
-app.secret_key = "tua-chiave-segreta"  # da personalizzare
+app.secret_key = "tua-chiave-super-segreta"
 
 PATH_FILE = "disponibilita.json"
 UTENTI = {
-    "admin": "adminpass",
     "gioele": "1234",
-    "mario": "abcd"
+    "admin": "adminpass"
 }
 
-# --- Utilità ---
+# --- Utility ---
 def carica_disponibilita():
     if not os.path.exists(PATH_FILE):
         return {}
@@ -48,12 +47,12 @@ def calendario():
         return redirect(url_for("login"))
     return render_template("calendario.html", username=session["username"])
 
-# --- Dati JSON per il frontend ---
+# --- Dati JSON per frontend ---
 @app.route("/dati_disponibilita_turni")
 def dati_disponibilita_turni():
     if "username" not in session:
         return jsonify({})
-    
+
     username = session["username"]
     disponibilita = carica_disponibilita()
 
@@ -69,7 +68,7 @@ def dati_disponibilita_turni():
         "tutte": disponibilita
     })
 
-# --- Invio disponibilità ---
+# --- Aggiorna turni ---
 @app.route("/aggiorna_disponibilita_turni", methods=["POST"])
 def aggiorna_disponibilita_turni():
     if "username" not in session:
@@ -79,22 +78,16 @@ def aggiorna_disponibilita_turni():
     selezioni = request.json.get("selezioni", [])
     dati = carica_disponibilita()
 
-    # Rimuovi l'utente da tutti i turni delle date inviate
-    for sel in selezioni:
-        data = sel["data"]
-        if data in dati:
-            for turno in ["M", "P"]:
-                if username in dati[data].get(turno, []):
-                    dati[data][turno].remove(username)
-
-    # Aggiungi nuova disponibilità
     for sel in selezioni:
         data = sel["data"]
         turno = sel["turno"]
+
         if data not in dati:
             dati[data] = {"M": [], "P": []}
-        if username not in dati[data][turno]:
-            dati[data][turno].append(username)
+        for t in ["M", "P"]:
+            if username in dati[data][t]:
+                dati[data][t].remove(username)
+        dati[data][turno].append(username)
 
     salva_disponibilita(dati)
     return "", 204
@@ -104,11 +97,10 @@ def aggiorna_disponibilita_turni():
 def riepilogo():
     if "username" not in session:
         return redirect(url_for("login"))
-
+    
     username = session["username"]
     dati = carica_disponibilita()
 
-    # Raggruppa disponibilità per data
     riepilogo = {}
     for data, turni in dati.items():
         for turno, utenti in turni.items():
@@ -117,7 +109,7 @@ def riepilogo():
 
     return render_template("riepilogo.html", username=username, disponibilita=riepilogo)
 
-# --- Rimuovi disponibilità (solo proprie) ---
+# --- Rimuovi disponibilità ---
 @app.route("/rimuovi_disponibilita", methods=["POST"])
 def rimuovi_disponibilita():
     if "username" not in session:
@@ -127,9 +119,6 @@ def rimuovi_disponibilita():
     data = request.form.get("data")
     turno = request.form.get("turno")
 
-    if not data or not turno:
-        return "Dati mancanti", 400
-
     dati = carica_disponibilita()
     if data in dati and turno in dati[data]:
         if username in dati[data][turno]:
@@ -137,3 +126,8 @@ def rimuovi_disponibilita():
             salva_disponibilita(dati)
 
     return redirect(url_for("riepilogo"))
+
+# --- Avvio ---
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
