@@ -15,18 +15,22 @@
 
     #calendar {
       max-width: 100%;
-      margin: 20px auto;
-      padding: 0 10px;
+      margin: 10px auto;
+      padding: 0 5px;
     }
 
     header {
       text-align: center;
-      padding: 10px;
+      padding: 10px 5px;
     }
 
     a {
       display: inline-block;
       margin-top: 10px;
+    }
+
+    .fc-daygrid-day {
+      height: 80px !important; /* rende i quadratini più piccoli e visibili su smartphone */
     }
   </style>
 </head>
@@ -47,10 +51,21 @@
       const calendarEl = document.getElementById('calendar');
       const disponibilita = new Set();
 
+      // Limita la selezione a un range di 4 settimane a partire da oggi
+      const oggi = new Date();
+      const inizio = new Date(oggi);
+      inizio.setDate(oggi.getDate() - oggi.getDay()); // lunedì di questa settimana
+      const fine = new Date(oggi);
+      fine.setDate(oggi.getDate() + (7 * 4)); // 4 settimane avanti
+
       const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridWeek', // mostra solo una settimana
+        initialView: 'dayGridWeek',
+        validRange: {
+          start: inizio.toISOString().split('T')[0],
+          end: fine.toISOString().split('T')[0]
+        },
         headerToolbar: {
-          left: 'prev,next today',
+          left: 'prev,next',
           center: 'title',
           right: ''
         },
@@ -58,6 +73,11 @@
         selectable: true,
         dateClick: function (info) {
           const data = info.dateStr;
+
+          if (info.date < inizio || info.date >= fine) {
+            alert("Non puoi selezionare questa data.");
+            return;
+          }
 
           if (disponibilita.has(data)) {
             disponibilita.delete(data);
