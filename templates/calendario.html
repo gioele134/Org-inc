@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Calendario Disponibilità</title>
+  <title>Calendario Disponibilità Incentivazioni</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
   <style>
@@ -90,10 +90,13 @@
   </header>
 
   <div class="navigazione">
-    <button id="prevBtn">← Settimana precedente</button>
-    <span id="titoloSettimana"></span>
-    <button id="nextBtn">Settimana successiva →</button>
+  <button id="prevBtn">← Settimana precedente</button>
+  <span id="titoloSettimana"></span>
+  <button id="nextBtn">Settimana successiva →</button>
+  <div style="margin-top: 10px; font-weight: bold;">
+    Date selezionate: <span id="contatoreSelezioni">0</span>
   </div>
+</div>
 
   <div class="settimana" id="griglia"></div>
 
