@@ -1,6 +1,6 @@
 body {
-  font-family: sans-serif;
   margin: 0;
+  font-family: sans-serif;
   background: #f4f4f4;
   color: #222;
 }
@@ -18,9 +18,16 @@ header a {
   text-decoration: underline;
 }
 
+.container {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* Navigazione */
 .navigazione {
   text-align: center;
-  padding: 1rem 0;
+  margin-bottom: 1rem;
 }
 
 .navigazione button {
@@ -28,34 +35,34 @@ header a {
   color: white;
   border: none;
   padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  cursor: pointer;
   margin: 0.2rem;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  cursor: pointer;
 }
 
 .contatore {
-  margin-top: 0.5rem;
-  font-size: 0.9rem;
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
 }
 
+/* Calendario */
 .settimana {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  width: 85%;
-  max-width: 300px;
-  margin: auto;
+  gap: 4px;
 }
 
+/* Giorni lun-sab */
 .giorno {
   position: relative;
   aspect-ratio: 1 / 1;
   background: white;
-  border: 1px solid #ccc;
+  border: 1px solid #ddd;
   font-size: 0.8rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
 }
 
 .giorno.selezionato {
@@ -80,21 +87,42 @@ header a {
   padding-right: 6px;
 }
 
-.domenica {
-  grid-template-columns: 1fr;
-  background: rgba(255, 0, 0, 0.5);
-  height: 50px;
-  width: 85%
-  text-align: center;
+/* Etichetta giorno in alto a sinistra */
+.giorno .etichetta {
+  position: absolute;
+  top: 6px;
+  left: 6px;
   font-weight: bold;
+  font-size: 13px;
+}
+
+/* Conteggio disponibilità in basso a destra */
+.giorno .conteggio {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  font-size: 11px;
+  color: #444;
+  opacity: 0.7;
+}
+
+/* Domenica */
+.domenica {
+  grid-column: span 2;
+  height: 50px;
+  background: rgba(255, 0, 0, 0.5);
+  border: 1px solid #ddd;
+  font-weight: bold;
+  text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+/* Invio */
 .invia {
   text-align: center;
-  margin: 1rem;
+  margin-top: 1rem;
 }
 
 .invia button {
@@ -107,6 +135,7 @@ header a {
   cursor: pointer;
 }
 
+/* Toast */
 .toast {
   visibility: hidden;
   position: fixed;
