@@ -81,6 +81,7 @@ def riepilogo():
     username = session['username']
     dati = carica_disponibilita()
 
+    # Calcolo settimana attiva
     oggi = datetime.today()
     lunedi_base = oggi - timedelta(days=oggi.weekday())
     lunedi_base = lunedi_base.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -89,11 +90,13 @@ def riepilogo():
     lunedi_attivo = lunedi_base + timedelta(weeks=1 + settimana_index)
     domenica_attiva = lunedi_attivo + timedelta(days=6)
 
+    # NON filtriamo per utente: mostriamo tutto
     disponibilita_settimanale = {
         data: utenti for data, utenti in dati.items()
         if lunedi_attivo <= datetime.fromisoformat(data) <= domenica_attiva
     }
 
+    # Contatore per ciascun utente
     contatori = {}
     for utenti in dati.values():
         for u in utenti:
