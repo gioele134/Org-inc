@@ -1,8 +1,8 @@
 const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
 let settimanaCorrente = 0;
-let selezionate = new Set();
-let confermate = new Set();
-let mappaDisponibilita = {};
+let selezionate = {}; // es: { "2024-04-10": "M" }
+let confermate = {};  // es: { "2024-04-10": "M" }
+let mappaDisponibilita = {}; // es: { "2024-04-10": { M: 2, P: 1 } }
 
 document.addEventListener("DOMContentLoaded", async () => {
   await caricaDati();
@@ -13,15 +13,15 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 async function caricaDati() {
-  const res = await fetch("/dati_disponibilita");
+  const res = await fetch("/dati_disponibilita_turni");
   const dati = await res.json();
-  confermate = new Set(dati.confermate);
-  mappaDisponibilita = dati.tutte;
+  confermate = dati.confermate || {};
+  mappaDisponibilita = dati.tutte || {};
 }
 
 function cambiaSettimana(differenza) {
   const nuovaSettimana = settimanaCorrente + differenza;
-  if (nuovaSettimana >= 0 && nuovaSettimana <= 3) {
+  if (nuovaSettimana >= 0 && nuovaSettimana <= 4) {
     settimanaCorrente = nuovaSettimana;
     aggiornaSettimana();
   }
@@ -30,75 +30,100 @@ function cambiaSettimana(differenza) {
 function aggiornaSettimana() {
   const griglia = document.getElementById("griglia");
   griglia.innerHTML = "";
-  selezionate.clear();
+  selezionate = {};
   aggiornaContatore();
 
   const oggi = new Date();
-  const lunedi = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1 + settimanaCorrente * 7));
+  const giornoSettimana = oggi.getDay();
+  const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - giornoSettimana + 1)); // lunedì attuale
+  const lunedi = new Date(lunediCorrente);
+  lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1)); // +1 per saltare la settimana attuale
 
-  document.getElementById("titoloSettimana").textContent = `Settimana ${settimanaCorrente + 1}`;
+  const domenica = new Date(lunedi);
+  domenica.setDate(lunedi.getDate() + 6);
+  const range = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
+  document.getElementById("titoloSettimana").textContent = range;
 
   for (let i = 0; i < 6; i++) {
     const giorno = new Date(lunedi);
     giorno.setDate(lunedi.getDate() + i);
-    const dataISO = giorno.toISOString().split('T')[0];
-    const label = `${giorniSettimana[giorno.getDay()]} ${String(giorno.getDate()).padStart(2, '0')}`;
+    const dataISO = giorno.toISOString().split("T")[0];
+    const etichetta = `${giorniSettimana[giorno.getDay()]} ${String(giorno.getDate()).padStart(2, "0")}`;
 
     const div = document.createElement("div");
     div.classList.add("giorno");
 
-    if (confermate.has(dataISO)) {
-      div.classList.add("confermata");
-    } else {
-      div.addEventListener("click", () => toggleSelezione(div, dataISO));
-    }
+    const label = document.createElement("div");
+    label.classList.add("etichetta");
+    label.textContent = etichetta;
 
-    const etichetta = document.createElement("div");
-    etichetta.classList.add("etichetta");
-    etichetta.textContent = label;
+    const turniDiv = document.createElement("div");
+    turniDiv.classList.add("turni");
+
+    ["M", "P"].forEach(turno => {
+      const btn = document.createElement("button");
+      btn.classList.add("turno-btn");
+      btn.textContent = turno;
+
+      if (confermate[dataISO] === turno) {
+        btn.classList.add("selezionato");
+        btn.disabled = true;
+      }
+
+      btn.addEventListener("click", () => {
+        if (btn.disabled) return;
+
+        // alternanza esclusiva M / P
+        selezionate[dataISO] = selezionate[dataISO] === turno ? null : turno;
+        aggiornaSettimana();
+      });
+
+      if (selezionate[dataISO] === turno) {
+        btn.classList.add("selezionato");
+      }
+
+      turniDiv.appendChild(btn);
+    });
 
     const conteggio = document.createElement("div");
     conteggio.classList.add("conteggio");
-    conteggio.textContent = (mappaDisponibilita[dataISO] || []).length;
+    const contM = (mappaDisponibilita[dataISO]?.M || 0);
+    const contP = (mappaDisponibilita[dataISO]?.P || 0);
+    conteggio.textContent = `M: ${contM} / P: ${contP}`;
 
-    div.appendChild(etichetta);
+    div.appendChild(label);
+    div.appendChild(turniDiv);
     div.appendChild(conteggio);
     griglia.appendChild(div);
   }
 
-  // Domenica
-  const domenica = new Date(lunedi);
-  domenica.setDate(lunedi.getDate() + 6);
-  const domLabel = `DOMENICA ${String(domenica.getDate()).padStart(2, '0')}`;
-
+  // domenica
+  const dom = new Date(domenica);
+  const domLabel = `DOMENICA ${String(dom.getDate()).padStart(2, "0")}`;
   const divDom = document.createElement("div");
   divDom.classList.add("domenica");
   divDom.textContent = domLabel;
   griglia.appendChild(divDom);
-}
 
-function toggleSelezione(div, data) {
-  if (selezionate.has(data)) {
-    selezionate.delete(data);
-    div.classList.remove("selezionato");
-  } else {
-    selezionate.add(data);
-    div.classList.add("selezionato");
-  }
   aggiornaContatore();
 }
 
 function aggiornaContatore() {
-  document.getElementById("contatoreSelezioni").textContent = selezionate.size;
+  const totale = Object.values(selezionate).filter(v => v !== null).length;
+  document.getElementById("contatoreSelezioni").textContent = totale;
 }
 
 async function inviaSelezioni() {
-  if (selezionate.size === 0) return;
+  const daInviare = Object.entries(selezionate)
+    .filter(([_, turno]) => turno)
+    .map(([data, turno]) => ({ data, turno }));
 
-  const res = await fetch("/aggiorna_disponibilita", {
+  if (daInviare.length === 0) return;
+
+  const res = await fetch("/aggiorna_disponibilita_turni", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ aggiunte: [...selezionate] })
+    body: JSON.stringify({ selezioni: daInviare })
   });
 
   if (res.ok) {
@@ -109,14 +134,12 @@ async function inviaSelezioni() {
 }
 
 function mostraToast(msg) {
-  let toast = document.getElementById("toast");
-  if (!toast) {
-    toast = document.createElement("div");
-    toast.id = "toast";
-    toast.classList.add("toast");
-    document.body.appendChild(toast);
-  }
+  const toast = document.getElementById("toast");
   toast.textContent = msg;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+function formattaDataBreve(data) {
+  return `${String(data.getDate()).padStart(2, "0")} ${data.toLocaleString("it-IT", { month: "short" })}`;
 }
