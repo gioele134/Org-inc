@@ -71,7 +71,7 @@ header a {
 }
 
 .giorno.confermata::after {
-  content: "✔";
+  content: "";
   position: absolute;
   top: 0;
   right: 0;
@@ -79,12 +79,6 @@ header a {
   height: 0;
   border-top: 24px solid green;
   border-left: 24px solid transparent;
-  color: white;
-  font-size: 12px;
-  font-weight: bold;
-  text-align: center;
-  padding-top: 2px;
-  padding-right: 6px;
 }
 
 /* Etichetta giorno in alto a sinistra */
