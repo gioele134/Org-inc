@@ -4,9 +4,7 @@
   <meta charset="UTF-8">
   <title>Calendario Disponibilità</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-
-  <!-- FullCalendar CSS -->
-  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css" rel="stylesheet" />
 
   <style>
     body {
@@ -30,13 +28,9 @@
     <div id="calendar"></div>
   </main>
 
-  <!-- FullCalendar JS -->
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js" defer></script>
-
-  <script defer>
-    window.addEventListener('DOMContentLoaded', function () {
-      console.log('DOM caricato, inizializzo il calendario');
-
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
       const calendarEl = document.getElementById('calendar');
       const disponibilita = new Set();
 
