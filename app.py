@@ -1,12 +1,13 @@
 from flask import Flask, render_template, request, redirect, url_for, session, flash
 import os
+from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = 'chiave_super_segreta'  # Cambiala in produzione
 
 # Utenti autorizzati
 UTENTI_AUTORIZZATI = {
-    'utente1': 'password123',
+    'gioelel': 'password123',
     'utente2': 'segreto456'
 }
 
@@ -33,6 +34,17 @@ def calendario():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('calendario.html', username=session['username'])
+
+@app.route('/aggiorna_disponibilita', methods=['POST'])
+def aggiorna_disponibilita():
+    from flask import request
+    dati = request.get_json()
+    data = dati.get('data')
+    disponibile = dati.get('disponibile')
+
+    print(f"Ricevuto: {data} - disponibile: {disponibile}")
+    # Qui potrai salvare in DB o file
+    return jsonify({"status": "ok"})
 
 @app.route('/logout')
 def logout():
