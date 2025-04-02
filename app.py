@@ -68,14 +68,6 @@ def aggiorna_disponibilita():
 def dati_disponibilita():
     return jsonify(carica_disponibilita())
 
-@app.route('/aggiorna_disponibilita', methods=['POST'])
-def aggiorna_disponibilita():
-    dati = request.get_json()
-    data = dati.get('data')
-    disponibile = dati.get('disponibile')
-    print(f"Disponibilità ricevuta: {data} - disponibile: {disponibile}")
-    return jsonify({"status": "ok"})
-
 # Avvio server compatibile con Render
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
