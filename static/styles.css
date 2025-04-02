@@ -52,9 +52,9 @@ header a {
 .settimana {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  padding: 0;
+  padding: 10px;
   margin: 0 auto;
-  max-width: 600px;
+  max-width: 300px;
   border-spacing: 0;
 }
 
@@ -99,33 +99,21 @@ header a {
 }
 
 /* --- Flag triangolare con check bianco --- */
-.confermata::before {
+.giorno.confermata::after {
   content: "✔";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 0;
+  height: 0;
+  border-top: 24px solid green;
+  border-left: 24px solid transparent;
   color: white;
-  position: absolute;
-  top: 0;
-  right: 0;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: bold;
-  width: 0;
-  height: 0;
-  border-top: 30px solid green;
-  border-left: 30px solid transparent;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transform: translate(5px, -5px);
-}
-
-.confermata::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 0;
-  height: 0;
-  border-top: 30px solid green;
-  border-left: 30px solid transparent;
+  text-align: center;
+  padding-top: 2px;
+  padding-right: 6px;
 }
 
 /* Domenica: stile coerente, sottile */
