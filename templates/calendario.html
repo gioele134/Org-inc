@@ -12,6 +12,9 @@
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
 
   <style>
+    body {
+      font-family: Arial, sans-serif;
+    }
     #calendar {
       max-width: 100%;
       margin: 20px auto;
@@ -32,7 +35,6 @@
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const calendarEl = document.getElementById('calendar');
-
       const disponibilita = new Set();
 
       const calendar = new FullCalendar.Calendar(calendarEl, {
@@ -50,7 +52,6 @@
             info.dayEl.style.backgroundColor = '#00cc66';
           }
 
-          // Invia la nuova disponibilità al backend
           fetch('/aggiorna_disponibilita', {
             method: 'POST',
             headers: {
