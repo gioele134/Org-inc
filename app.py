@@ -1,131 +1,139 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import json
-from pathlib import Path
+from datetime import datetime
 import os
-from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'
-FILE_DISPONIBILITA = Path("disponibilita.json")
+app.secret_key = "tua-chiave-segreta"  # da personalizzare
 
-# ------------------- Utility -------------------
+PATH_FILE = "disponibilita.json"
+UTENTI = {
+    "admin": "adminpass",
+    "gioele": "1234",
+    "mario": "abcd"
+}
 
+# --- Utilità ---
 def carica_disponibilita():
-    if FILE_DISPONIBILITA.exists():
-        with open(FILE_DISPONIBILITA, "r") as f:
-            return json.load(f)
-    return {}
+    if not os.path.exists(PATH_FILE):
+        return {}
+    with open(PATH_FILE, "r") as f:
+        return json.load(f)
 
 def salva_disponibilita(dati):
-    with open(FILE_DISPONIBILITA, "w") as f:
-        json.dump(dati, f)
+    with open(PATH_FILE, "w") as f:
+        json.dump(dati, f, indent=2)
 
-# ------------------- Login -------------------
-
-@app.route('/', methods=['GET', 'POST'])
+# --- Login ---
+@app.route("/", methods=["GET", "POST"])
 def login():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
-        if username and password:
-            session['username'] = username
-            return redirect(url_for('calendario'))
-        return render_template('login.html', errore="Credenziali non valide")
-    return render_template('login.html')
+    if request.method == "POST":
+        user = request.form["username"]
+        pw = request.form["password"]
+        if user in UTENTI and UTENTI[user] == pw:
+            session["username"] = user
+            return redirect(url_for("calendario"))
+        return render_template("login.html", errore="Credenziali non valide")
+    return render_template("login.html")
 
-@app.route('/logout')
+@app.route("/logout")
 def logout():
     session.clear()
-    return redirect(url_for('login'))
+    return redirect(url_for("login"))
 
-# ------------------- Calendario -------------------
-
-@app.route('/calendario')
+# --- Calendario ---
+@app.route("/calendario")
 def calendario():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('calendario.html', username=session['username'])
+    if "username" not in session:
+        return redirect(url_for("login"))
+    return render_template("calendario.html", username=session["username"])
 
-@app.route('/dati_disponibilita')
-def dati_disponibilita():
-    username = session.get('username')
-    dati = carica_disponibilita()
-    confermate = [data for data, utenti in dati.items() if username in utenti]
-    return jsonify({
-        "tutte": dati,
-        "confermate": confermate
-    })
+# --- Dati JSON per il frontend ---
+@app.route("/dati_disponibilita_turni")
+def dati_disponibilita_turni():
+    if "username" not in session:
+        return jsonify({})
+    
+    username = session["username"]
+    disponibilita = carica_disponibilita()
 
-@app.route('/aggiorna_disponibilita', methods=['POST'])
-def aggiorna_disponibilita():
-    username = session.get('username')
-    dati = request.get_json()
-    aggiunte = dati.get("aggiunte", [])
-    tutte = carica_disponibilita()
-
-    for data in aggiunte:
-        tutte.setdefault(data, [])
-        if username not in tutte[data]:
-            tutte[data].append(username)
-
-    salva_disponibilita(tutte)
-    return jsonify({"status": "ok"})
-
-# ------------------- Riepilogo -------------------
-
-@app.route('/riepilogo')
-def riepilogo():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    username = session['username']
-    dati = carica_disponibilita()
-
-    # Calcolo settimana attiva
-    oggi = datetime.today()
-    lunedi_base = oggi - timedelta(days=oggi.weekday())
-    lunedi_base = lunedi_base.replace(hour=0, minute=0, second=0, microsecond=0)
-
-    settimana_index = int(request.args.get("settimana", 0))
-    lunedi_attivo = lunedi_base + timedelta(weeks=1 + settimana_index)
-    domenica_attiva = lunedi_attivo + timedelta(days=6)
-
-    # NON filtriamo per utente: mostriamo tutto
-    disponibilita_settimanale = {
-        data: utenti for data, utenti in dati.items()
-        if lunedi_attivo <= datetime.fromisoformat(data) <= domenica_attiva
+    confermate = {
+        data: turno
+        for data, turni in disponibilita.items()
+        for turno, utenti in turni.items()
+        if username in utenti
     }
 
-    # Contatore per ciascun utente
-    contatori = {}
-    for utenti in dati.values():
-        for u in utenti:
-            contatori[u] = contatori.get(u, 0) + 1
+    return jsonify({
+        "confermate": confermate,
+        "tutte": disponibilita
+    })
 
-    return render_template(
-        'riepilogo.html',
-        username=username,
-        disponibilita=disponibilita_settimanale,
-        settimana_index=settimana_index,
-        contatori=contatori
-    )
+# --- Invio disponibilità ---
+@app.route("/aggiorna_disponibilita_turni", methods=["POST"])
+def aggiorna_disponibilita_turni():
+    if "username" not in session:
+        return "Non autorizzato", 403
 
-@app.route('/elimina_disponibilita', methods=['POST'])
-def elimina_disponibilita():
-    username = session.get('username')
-    data = request.get_json().get('data')
-    tutte = carica_disponibilita()
+    username = session["username"]
+    selezioni = request.json.get("selezioni", [])
+    dati = carica_disponibilita()
 
-    if data in tutte and username in tutte[data]:
-        tutte[data].remove(username)
-        if not tutte[data]:
-            del tutte[data]
-        salva_disponibilita(tutte)
-        return jsonify({"status": "ok"})
-    return jsonify({"status": "not_found"}), 404
+    # Rimuovi l'utente da tutti i turni delle date inviate
+    for sel in selezioni:
+        data = sel["data"]
+        if data in dati:
+            for turno in ["M", "P"]:
+                if username in dati[data].get(turno, []):
+                    dati[data][turno].remove(username)
 
-# ------------------- Avvio -------------------
+    # Aggiungi nuova disponibilità
+    for sel in selezioni:
+        data = sel["data"]
+        turno = sel["turno"]
+        if data not in dati:
+            dati[data] = {"M": [], "P": []}
+        if username not in dati[data][turno]:
+            dati[data][turno].append(username)
 
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    salva_disponibilita(dati)
+    return "", 204
+
+# --- Riepilogo ---
+@app.route("/riepilogo")
+def riepilogo():
+    if "username" not in session:
+        return redirect(url_for("login"))
+
+    username = session["username"]
+    dati = carica_disponibilita()
+
+    # Raggruppa disponibilità per data
+    riepilogo = {}
+    for data, turni in dati.items():
+        for turno, utenti in turni.items():
+            for u in utenti:
+                riepilogo.setdefault(data, []).append((u, turno))
+
+    return render_template("riepilogo.html", username=username, disponibilita=riepilogo)
+
+# --- Rimuovi disponibilità (solo proprie) ---
+@app.route("/rimuovi_disponibilita", methods=["POST"])
+def rimuovi_disponibilita():
+    if "username" not in session:
+        return "Non autorizzato", 403
+
+    username = session["username"]
+    data = request.form.get("data")
+    turno = request.form.get("turno")
+
+    if not data or not turno:
+        return "Dati mancanti", 400
+
+    dati = carica_disponibilita()
+    if data in dati and turno in dati[data]:
+        if username in dati[data][turno]:
+            dati[data][turno].remove(username)
+            salva_disponibilita(dati)
+
+    return redirect(url_for("riepilogo"))
