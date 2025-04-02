@@ -39,12 +39,12 @@
       border-radius: 8px;
       color: #000;
       font-weight: bold;
-      background-color: rgba(0, 128, 0, 0.1); /* verde 10% */
+      background-color: rgba(0, 128, 0, 0.1);
       box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
 
     .giorno.disponibilita-2 {
-      background-color: rgba(255, 165, 0, 0.1); /* arancione 10% */
+      background-color: rgba(255, 165, 0, 0.1);
     }
 
     .giorno:hover {
@@ -60,6 +60,25 @@
       height: 50px;
       pointer-events: none;
     }
+
+    .navigazione {
+      margin: 15px 0;
+    }
+
+    .navigazione button {
+      margin: 0 10px;
+      padding: 10px 15px;
+      border: none;
+      background-color: #0077cc;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    .navigazione button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
@@ -69,23 +88,48 @@
     <a href="{{ url_for('logout') }}">Logout</a>
   </header>
 
+  <div class="navigazione">
+    <button id="prevBtn">← Indietro</button>
+    <span id="titoloSettimana"></span>
+    <button id="nextBtn">Avanti →</button>
+  </div>
+
   <div class="settimana" id="griglia">
-    <!-- I 7 blocchi saranno generati da JavaScript -->
+    <!-- 7 blocchi -->
   </div>
 
   <script>
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
     const disponibilita = {};
     const oggi = new Date();
-    const lunedi = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
+
+    // Trova il lunedì successivo
+    const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
+    const primoLunedi = new Date(lunediCorrente);
+    primoLunedi.setDate(lunediCorrente.getDate() + 7); // lunedì della prossima settimana
+
+    let settimanaIndex = 0; // da 0 a 4
 
     function formatData(date) {
       return date.toISOString().split('T')[0];
     }
 
+    function getLunediSettimana(i) {
+      const base = new Date(primoLunedi);
+      base.setDate(base.getDate() + (i * 7));
+      return base;
+    }
+
     function creaGriglia() {
       const container = document.getElementById('griglia');
+      const titolo = document.getElementById('titoloSettimana');
       container.innerHTML = '';
+
+      const lunedi = getLunediSettimana(settimanaIndex);
+      const domenica = new Date(lunedi);
+      domenica.setDate(lunedi.getDate() + 6);
+
+      titolo.textContent = `Settimana: ${formatData(lunedi)} → ${formatData(domenica)}`;
 
       for (let i = 0; i < 7; i++) {
         const giornoData = new Date(lunedi);
@@ -110,7 +154,7 @@
               disponibilita[dataStr]++;
             }
 
-            creaGriglia(); // aggiorna grafica
+            creaGriglia();
 
             fetch('/aggiorna_disponibilita', {
               method: 'POST',
@@ -127,12 +171,30 @@
 
         container.appendChild(div);
       }
+
+      document.getElementById('prevBtn').disabled = settimanaIndex === 0;
+      document.getElementById('nextBtn').disabled = settimanaIndex === 4;
     }
 
     document.addEventListener('DOMContentLoaded', async function () {
       const res = await fetch('/dati_disponibilita');
       const dati = await res.json();
       Object.assign(disponibilita, dati);
+
+      document.getElementById('prevBtn').addEventListener('click', () => {
+        if (settimanaIndex > 0) {
+          settimanaIndex--;
+          creaGriglia();
+        }
+      });
+
+      document.getElementById('nextBtn').addEventListener('click', () => {
+        if (settimanaIndex < 4) {
+          settimanaIndex++;
+          creaGriglia();
+        }
+      });
+
       creaGriglia();
     });
   </script>
