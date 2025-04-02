@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import json
 from pathlib import Path
+import os
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'  # cambia con una chiave sicura in produzione
@@ -86,8 +87,6 @@ def aggiorna_disponibilita():
     return jsonify({"status": "ok"})
 
 # ------------------- Avvio -------------------
-
-import os
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
