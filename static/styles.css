@@ -41,15 +41,15 @@ header a {
 .settimana {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  width: 100%;
-  max-width: 500px;
+  width: 70%;
+  max-width: 200px;
   margin: auto;
 }
 
 .giorno {
   position: relative;
   aspect-ratio: 1 / 1;
-  background: rgba(0, 128, 0, 0.1);
+  background: white;
   border: 1px solid #ccc;
   font-size: 0.8rem;
   display: flex;
@@ -81,7 +81,7 @@ header a {
 }
 
 .domenica {
-  grid-column: span 2;
+  grid-template-columns: 1fr;
   background: rgba(255, 0, 0, 0.5);
   height: 50px;
   text-align: center;
