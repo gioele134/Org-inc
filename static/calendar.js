@@ -1,8 +1,8 @@
 const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
 let settimanaCorrente = 0;
-let selezionate = {}; // es: { "2024-04-10": "M" }
-let confermate = {};  // es: { "2024-04-10": "M" }
-let mappaDisponibilita = {}; // es: { "2024-04-10": { M: 2, P: 1 } }
+let selezionate = {};  // { "2024-04-10": "M" }
+let confermate = {};
+let mappaDisponibilita = {}; // { "2024-04-10": { M: 2, P: 1 } }
 
 document.addEventListener("DOMContentLoaded", async () => {
   await caricaDati();
@@ -20,9 +20,9 @@ async function caricaDati() {
 }
 
 function cambiaSettimana(differenza) {
-  const nuovaSettimana = settimanaCorrente + differenza;
-  if (nuovaSettimana >= 0 && nuovaSettimana <= 4) {
-    settimanaCorrente = nuovaSettimana;
+  const nuova = settimanaCorrente + differenza;
+  if (nuova >= 0 && nuova < 5) {
+    settimanaCorrente = nuova;
     aggiornaSettimana();
   }
 }
@@ -30,32 +30,30 @@ function cambiaSettimana(differenza) {
 function aggiornaSettimana() {
   const griglia = document.getElementById("griglia");
   griglia.innerHTML = "";
-  selezionate = {};
   aggiornaContatore();
 
   const oggi = new Date();
-  const giornoSettimana = oggi.getDay();
-  const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - giornoSettimana + 1)); // lunedì attuale
+  const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
   const lunedi = new Date(lunediCorrente);
-  lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1)); // +1 per saltare la settimana attuale
+  lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1));  // +1 per escludere la settimana attuale
 
   const domenica = new Date(lunedi);
-  domenica.setDate(lunedi.getDate() + 6);
+  domenica.setDate(domenica.getDate() + 6);
   const range = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
   document.getElementById("titoloSettimana").textContent = range;
 
   for (let i = 0; i < 6; i++) {
     const giorno = new Date(lunedi);
-    giorno.setDate(lunedi.getDate() + i);
+    giorno.setDate(giorno.getDate() + i);
     const dataISO = giorno.toISOString().split("T")[0];
-    const etichetta = `${giorniSettimana[giorno.getDay()]} ${String(giorno.getDate()).padStart(2, "0")}`;
+    const label = `${giorniSettimana[giorno.getDay()]} ${String(giorno.getDate()).padStart(2, "0")}`;
 
     const div = document.createElement("div");
     div.classList.add("giorno");
 
-    const label = document.createElement("div");
-    label.classList.add("etichetta");
-    label.textContent = etichetta;
+    const etichetta = document.createElement("div");
+    etichetta.classList.add("etichetta");
+    etichetta.textContent = label;
 
     const turniDiv = document.createElement("div");
     turniDiv.classList.add("turni");
@@ -65,22 +63,26 @@ function aggiornaSettimana() {
       btn.classList.add("turno-btn");
       btn.textContent = turno;
 
+      // Se già confermata (inviata), disabilita
       if (confermate[dataISO] === turno) {
         btn.classList.add("selezionato");
         btn.disabled = true;
       }
 
-      btn.addEventListener("click", () => {
-        if (btn.disabled) return;
-
-        // alternanza esclusiva M / P
-        selezionate[dataISO] = selezionate[dataISO] === turno ? null : turno;
-        aggiornaSettimana();
-      });
-
+      // Se selezionata (non ancora inviata), evidenzia
       if (selezionate[dataISO] === turno) {
         btn.classList.add("selezionato");
       }
+
+      // Gestione click
+      btn.addEventListener("click", () => {
+        if (selezionate[dataISO] === turno) {
+          delete selezionate[dataISO];
+        } else {
+          selezionate[dataISO] = turno;
+        }
+        aggiornaSettimana();
+      });
 
       turniDiv.appendChild(btn);
     });
@@ -91,13 +93,13 @@ function aggiornaSettimana() {
     const contP = (mappaDisponibilita[dataISO]?.P || 0);
     conteggio.textContent = `M: ${contM} / P: ${contP}`;
 
-    div.appendChild(label);
+    div.appendChild(etichetta);
     div.appendChild(turniDiv);
     div.appendChild(conteggio);
     griglia.appendChild(div);
   }
 
-  // domenica
+  // DOMENICA
   const dom = new Date(domenica);
   const domLabel = `DOMENICA ${String(dom.getDate()).padStart(2, "0")}`;
   const divDom = document.createElement("div");
@@ -109,7 +111,7 @@ function aggiornaSettimana() {
 }
 
 function aggiornaContatore() {
-  const totale = Object.values(selezionate).filter(v => v !== null).length;
+  const totale = Object.values(selezionate).filter(Boolean).length;
   document.getElementById("contatoreSelezioni").textContent = totale;
 }
 
@@ -128,6 +130,7 @@ async function inviaSelezioni() {
 
   if (res.ok) {
     mostraToast("Disponibilità aggiornata");
+    selezionate = {};
     await caricaDati();
     aggiornaSettimana();
   }
