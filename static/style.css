@@ -1,90 +1,14 @@
-/* Reset base */
 body {
+  font-family: Arial, sans-serif;
   margin: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f4f4;
-  color: #333;
+  background-color: #f9f9f9;
 }
 
-/* Container centrato per login */
-.login-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 2rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-h2 {
-  text-align: center;
-  margin-bottom: 1.5rem;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-}
-
-label {
-  margin-top: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-input[type="text"],
-input[type="password"],
-input[type="email"] {
-  padding: 0.75rem;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  margin-top: 1.5rem;
-  padding: 0.75rem;
-  background-color: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #005fa3;
-}
-
-/* Errore login */
-.errore {
-  background-color: #ffdddd;
-  color: #a00;
-  border: 1px solid #f5c2c2;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  border-radius: 5px;
-}
-
-/* Calendario page layout */
 header {
-  padding: 1rem;
+  padding: 15px;
   background-color: #0077cc;
   color: white;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-header h1 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-header p {
-  margin: 0.5rem 0;
-}
-
-main {
-  padding: 1rem;
+  text-align: center;
 }
 
 a {
@@ -92,18 +16,79 @@ a {
   text-decoration: underline;
 }
 
-a:hover {
-  text-decoration: none;
+.navigazione {
+  text-align: center;
+  margin: 15px 0;
 }
 
-/* Mobile-first: già ottimizzato, ma aggiungiamo breakpoint per desktop */
-@media (min-width: 768px) {
-  .login-container {
-    margin: 80px auto;
-    padding: 3rem;
-  }
+.navigazione button {
+  background-color: #0077cc;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  margin: 5px;
+  cursor: pointer;
+}
 
-  header {
-    justify-content: space-between;
-  }
+.navigazione button:disabled {
+  background-color: #aaa;
+}
+
+.contatore {
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.settimana {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 400px;
+  margin: 20px auto;
+  gap: 0;
+  border: 1px solid #ccc;
+}
+
+.giorno {
+  padding: 25px 5px;
+  border: 1px solid #ccc;
+  font-weight: bold;
+  background-color: white;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.giorno.disponibilita-1 {
+  background-color: rgba(0, 128, 0, 0.1);
+}
+
+.giorno.disponibilita-2 {
+  background-color: rgba(255, 165, 0, 0.1);
+}
+
+.giorno.selezionato {
+  background-color: rgba(0, 128, 0, 0.8);
+  color: white;
+}
+
+.domenica {
+  grid-column: span 3;
+  background-color: rgba(255, 0, 0, 0.5) !important;
+  color: white;
+  pointer-events: none;
+}
+
+.invia {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.invia button {
+  background-color: #0077cc;
+  color: white;
+  padding: 10px 25px;
+  font-weight: bold;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
