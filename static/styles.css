@@ -8,8 +8,8 @@ body {
 header {
   background: #0077cc;
   color: white;
-  padding: 1rem;
   text-align: center;
+  padding: 1rem;
 }
 
 header a {
@@ -46,23 +46,20 @@ header a {
   font-size: 0.85rem;
 }
 
-/* Calendario */
+/* Calendario 3x2 + domenica */
 .settimana {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 4px;
+  gap: 2px;
 }
 
-/* Giorni lun-sab */
+/* Giorni lunedì-sabato */
 .giorno {
   position: relative;
   aspect-ratio: 1 / 1;
   background: white;
   border: 1px solid #ddd;
   font-size: 0.8rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .giorno.selezionato {
@@ -77,11 +74,11 @@ header a {
   right: 0;
   width: 0;
   height: 0;
-  border-top: 24px solid green;
-  border-left: 24px solid transparent;
+  border-top: 22px solid green;
+  border-left: 22px solid transparent;
 }
 
-/* Etichetta giorno in alto a sinistra */
+/* Etichetta in alto a sinistra */
 .giorno .etichetta {
   position: absolute;
   top: 6px;
@@ -90,30 +87,31 @@ header a {
   font-size: 13px;
 }
 
-/* Conteggio disponibilità in basso a destra */
+/* Conteggio in basso a destra */
 .giorno .conteggio {
   position: absolute;
   bottom: 6px;
   right: 6px;
   font-size: 11px;
-  color: #444;
-  opacity: 0.7;
+  opacity: 0.6;
 }
 
-/* Domenica */
+/* Domenica in fondo */
 .domenica {
   grid-column: span 2;
   height: 50px;
   background: rgba(255, 0, 0, 0.5);
-  border: 1px solid #ddd;
-  font-weight: bold;
   text-align: center;
+  font-weight: bold;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+  pointer-events: none;
 }
 
-/* Invio */
+/* Invia */
 .invia {
   text-align: center;
   margin-top: 1rem;
