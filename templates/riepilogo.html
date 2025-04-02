@@ -2,38 +2,50 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Riepilogo disponibilità</title>
+  <title>Riepilogo Disponibilità</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <header>
-    <h2>Riepilogo disponibilità</h2>
-    <p>Benvenuto, {{ username }}</p>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <h2>Riepilogo Disponibilità</h2>
+    <p>Utente: {{ username }}</p>
     <a href="{{ url_for('calendario') }}">Torna al calendario</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
   </header>
 
-  <div class="navigazione">
-    <form method="get">
-      <button type="submit" name="settimana" value="{{ settimana_index - 1 }}" {% if settimana_index <= 0 %}disabled{% endif %}>← Settimana precedente</button>
-      <span>Settimana {{ settimana_index + 1 }}</span>
-      <button type="submit" name="settimana" value="{{ settimana_index + 1 }}" {% if settimana_index >= 3 %}disabled{% endif %}>Settimana successiva →</button>
-    </form>
-  </div>
-
-  <main class="riepilogo">
+  <div class="container">
     {% if disponibilita %}
       <ul class="riepilogo-lista">
-        {% for data, utenti in disponibilita.items()|sort %}
+        {% for data, entries in disponibilita|dictsort %}
           <li>
-            <strong>{{ data }} ({{ utenti|length }} utenti)</strong>
+            <strong>{{ data }}</strong>
+            <div><em>Mattina</em>:</div>
             <ul>
-              {% for user in utenti %}
+              {% for user, turno in entries if turno == 'M' %}
                 <li class="utente-riga">
-                  {{ user }} {% if contatori[user] %} ({{ contatori[user] }}){% endif %}
+                  {{ user }}
                   {% if user == username %}
-                    <button class="elimina-btn" data-data="{{ data }}">Elimina</button>
+                    <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}">
+                      <input type="hidden" name="data" value="{{ data }}">
+                      <input type="hidden" name="turno" value="M">
+                      <button class="elimina-btn" type="submit">Rimuovi</button>
+                    </form>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+            <div><em>Pomeriggio</em>:</div>
+            <ul>
+              {% for user, turno in entries if turno == 'P' %}
+                <li class="utente-riga">
+                  {{ user }}
+                  {% if user == username %}
+                    <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}">
+                      <input type="hidden" name="data" value="{{ data }}">
+                      <input type="hidden" name="turno" value="P">
+                      <button class="elimina-btn" type="submit">Rimuovi</button>
+                    </form>
                   {% endif %}
                 </li>
               {% endfor %}
@@ -42,37 +54,8 @@
         {% endfor %}
       </ul>
     {% else %}
-      <p>Nessuna disponibilità in questa settimana.</p>
+      <p>Nessuna disponibilità registrata.</p>
     {% endif %}
-  </main>
-
-  <div id="toast" class="toast">Disponibilità rimossa</div>
-
-  <script>
-    document.querySelectorAll(".elimina-btn").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const data = btn.dataset.data;
-
-        const res = await fetch("/elimina_disponibilita", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data })
-        });
-
-        if (res.ok) {
-          location.reload();
-        } else {
-          mostraToast("Errore nella rimozione");
-        }
-      });
-    });
-
-    function mostraToast(msg) {
-      const toast = document.getElementById("toast");
-      toast.textContent = msg;
-      toast.classList.add("show");
-      setTimeout(() => toast.classList.remove("show"), 2000);
-    }
-  </script>
+  </div>
 </body>
 </html>
