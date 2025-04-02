@@ -9,11 +9,24 @@
   <style>
     body {
       font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
 
     #calendar {
       max-width: 100%;
       margin: 20px auto;
+      padding: 0 10px;
+    }
+
+    header {
+      text-align: center;
+      padding: 10px;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 10px;
     }
   </style>
 </head>
@@ -35,9 +48,14 @@
       const disponibilita = new Set();
 
       const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        selectable: true,
+        initialView: 'dayGridWeek', // mostra solo una settimana
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: ''
+        },
         locale: 'it',
+        selectable: true,
         dateClick: function (info) {
           const data = info.dateStr;
 
