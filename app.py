@@ -54,14 +54,25 @@ def salva_disponibilita(dati):
 
 @app.route('/aggiorna_disponibilita', methods=['POST'])
 def aggiorna_disponibilita():
+    username = session.get('username')
     dati = request.get_json()
-    data = dati.get('data')
-    valore = dati.get('disponibilita')
+    aggiunte = dati.get("aggiunte", [])
+    rimosse = dati.get("rimosse", [])
 
     tutte = carica_disponibilita()
-    tutte[data] = valore
-    salva_disponibilita(tutte)
 
+    for data in aggiunte:
+        tutte.setdefault(data, [])
+        if username not in tutte[data]:
+            tutte[data].append(username)
+
+    for data in rimosse:
+        if data in tutte and username in tutte[data]:
+            tutte[data].remove(username)
+            if not tutte[data]:
+                del tutte[data]
+
+    salva_disponibilita(tutte)
     return jsonify({"status": "ok"})
 
 @app.route('/dati_disponibilita')
