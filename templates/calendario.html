@@ -4,6 +4,19 @@
   <meta charset="UTF-8">
   <title>Calendario Disponibilità</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <!-- FullCalendar CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.css" rel="stylesheet" />
+
+  <!-- FullCalendar JS -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/main.min.js"></script>
+
+  <style>
+    #calendar {
+      max-width: 100%;
+      margin: 20px auto;
+    }
+  </style>
 </head>
 <body>
   <header>
@@ -13,8 +26,46 @@
   </header>
 
   <main>
-    <p>Qui verrà visualizzato il calendario con le disponibilità.</p>
-    <!-- Prossimo step: inserire calendario reale -->
+    <div id="calendar"></div>
   </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+
+      const disponibilita = new Set();
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        selectable: true,
+        locale: 'it',
+        dateClick: function (info) {
+          const data = info.dateStr;
+
+          if (disponibilita.has(data)) {
+            disponibilita.delete(data);
+            info.dayEl.style.backgroundColor = '';
+          } else {
+            disponibilita.add(data);
+            info.dayEl.style.backgroundColor = '#00cc66';
+          }
+
+          // Invia la nuova disponibilità al backend
+          fetch('/aggiorna_disponibilita', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              data: data,
+              disponibile: disponibilita.has(data)
+            })
+          });
+        }
+      });
+
+      calendar.render();
+    });
+  </script>
 </body>
 </html>
