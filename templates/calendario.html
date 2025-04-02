@@ -2,22 +2,21 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Settimana Disponibilità</title>
+  <title>Calendario Disponibilità</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 
   <style>
     body {
       font-family: Arial, sans-serif;
       margin: 0;
-      padding: 0;
-      text-align: center;
       background-color: #f9f9f9;
     }
 
     header {
-      padding: 10px;
+      padding: 15px;
       background-color: #0077cc;
       color: white;
+      text-align: center;
     }
 
     a {
@@ -27,91 +26,101 @@
 
     .settimana {
       display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 15px;
+      grid-template-columns: repeat(3, 1fr);
       max-width: 400px;
-      margin: 0 auto;
+      margin: 20px auto;
+      gap: 0;
+      border: 1px solid #ccc;
     }
 
     .giorno {
-      padding: 30px 10px;
-      border-radius: 8px;
-      color: #000;
+      padding: 25px 5px;
+      border: 1px solid #ccc;
       font-weight: bold;
-      background-color: rgba(0, 128, 0, 0.1);
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      background-color: white;
+      box-sizing: border-box;
+    }
+
+    .giorno.disponibilita-1 {
+      background-color: rgba(0, 128, 0, 0.1); /* verde 10% */
     }
 
     .giorno.disponibilita-2 {
-      background-color: rgba(255, 165, 0, 0.1);
+      background-color: rgba(255, 165, 0, 0.1); /* arancione 10% */
     }
 
-    .giorno:hover {
-      cursor: pointer;
-      opacity: 0.9;
+    .giorno.selezionato {
+      background-color: rgba(0, 128, 0, 0.8); /* verde 80% */
+      color: white;
     }
 
     .domenica {
-      grid-column: span 2;
-      background-color: red !important;
+      grid-column: span 3;
+      background-color: rgba(255, 0, 0, 0.5) !important;
       color: white;
-      padding: 15px;
-      height: 50px;
       pointer-events: none;
+      text-align: center;
     }
 
-    .navigazione {
+    .navigazione, .invia {
+      text-align: center;
       margin: 15px 0;
     }
 
-    .navigazione button {
-      margin: 0 10px;
-      padding: 10px 15px;
-      border: none;
+    button {
       background-color: #0077cc;
       color: white;
+      padding: 10px 20px;
+      border: none;
       border-radius: 5px;
+      margin: 5px;
       cursor: pointer;
     }
 
-    .navigazione button:disabled {
-      background-color: #ccc;
-      cursor: not-allowed;
+    button:disabled {
+      background-color: #aaa;
     }
   </style>
 </head>
 <body>
   <header>
-    <h2>Disponibilità Settimanale</h2>
+    <h2>Calendario Disponibilità</h2>
     <p>Benvenuto, {{ username }}</p>
     <a href="{{ url_for('logout') }}">Logout</a>
   </header>
 
   <div class="navigazione">
-    <button id="prevBtn">← Indietro</button>
+    <button id="prevBtn">← Settimana precedente</button>
     <span id="titoloSettimana"></span>
-    <button id="nextBtn">Avanti →</button>
+    <button id="nextBtn">Settimana successiva →</button>
   </div>
 
-  <div class="settimana" id="griglia">
-    <!-- 7 blocchi -->
+  <div class="settimana" id="griglia"></div>
+
+  <div class="invia">
+    <button id="inviaBtn">Invia</button>
   </div>
 
   <script>
     const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
     const disponibilita = {};
-    const oggi = new Date();
+    const selezioniUtente = new Set();
 
-    // Trova il lunedì successivo
+    const oggi = new Date();
     const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
     const primoLunedi = new Date(lunediCorrente);
-    primoLunedi.setDate(lunediCorrente.getDate() + 7); // lunedì della prossima settimana
+    primoLunedi.setDate(primoLunedi.getDate() + 7); // esclude settimana corrente
 
     let settimanaIndex = 0; // da 0 a 4
 
     function formatData(date) {
+      const giorno = String(date.getDate()).padStart(2, '0');
       return date.toISOString().split('T')[0];
+    }
+
+    function etichettaGiorno(i, data) {
+      const numero = String(data.getDate()).padStart(2, '0');
+      return `${giorni[i]} ${numero}`;
     }
 
     function getLunediSettimana(i) {
@@ -138,34 +147,29 @@
 
         const div = document.createElement('div');
         div.classList.add('giorno');
-        div.textContent = `${giorni[i]} (${dataStr})`;
+        div.dataset.data = dataStr;
+        div.textContent = etichettaGiorno(i, giornoData);
 
         if (i === 6) {
           div.classList.add('domenica');
         } else {
           if (disponibilita[dataStr] === 2) {
             div.classList.add('disponibilita-2');
+          } else if (disponibilita[dataStr] === 1) {
+            div.classList.add('disponibilita-1');
+          }
+
+          if (selezioniUtente.has(dataStr)) {
+            div.classList.add('selezionato');
           }
 
           div.addEventListener('click', () => {
-            if (!disponibilita[dataStr]) {
-              disponibilita[dataStr] = 1;
-            } else if (disponibilita[dataStr] < 2) {
-              disponibilita[dataStr]++;
+            if (selezioniUtente.has(dataStr)) {
+              selezioniUtente.delete(dataStr);
+            } else {
+              selezioniUtente.add(dataStr);
             }
-
             creaGriglia();
-
-            fetch('/aggiorna_disponibilita', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json'
-              },
-              body: JSON.stringify({
-                data: dataStr,
-                disponibilita: disponibilita[dataStr]
-              })
-            });
           });
         }
 
@@ -193,6 +197,29 @@
           settimanaIndex++;
           creaGriglia();
         }
+      });
+
+      document.getElementById('inviaBtn').addEventListener('click', async () => {
+        for (let dataStr of selezioniUtente) {
+          const count = disponibilita[dataStr] || 0;
+          if (count < 2) {
+            disponibilita[dataStr] = count + 1;
+            await fetch('/aggiorna_disponibilita', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                data: dataStr,
+                disponibilita: disponibilita[dataStr]
+              })
+            });
+          }
+        }
+
+        selezioniUtente.clear();
+        creaGriglia();
+        alert("Disponibilità inviate con successo.");
       });
 
       creaGriglia();
