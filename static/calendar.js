@@ -1,13 +1,14 @@
 const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-const disponibilita = {};
-const selezioniUtente = new Set();
+const selezionate = new Set();
+const confermate = new Set();
 
 const oggi = new Date();
 const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
 const primoLunedi = new Date(lunediCorrente);
-primoLunedi.setDate(primoLunedi.getDate() + 7); // settimana successiva
+primoLunedi.setDate(primoLunedi.getDate() + 7);
 
 let settimanaIndex = 0;
+let disponibilitaTutte = {};
 
 function formatData(date) {
   return date.toISOString().split('T')[0];
@@ -25,7 +26,7 @@ function getLunediSettimana(i) {
 }
 
 function aggiornaContatore() {
-  document.getElementById('contatoreSelezioni').textContent = selezioniUtente.size;
+  document.getElementById('contatoreSelezioni').textContent = selezionate.size;
 }
 
 function creaGriglia() {
@@ -36,7 +37,6 @@ function creaGriglia() {
   const lunedi = getLunediSettimana(settimanaIndex);
   const domenica = new Date(lunedi);
   domenica.setDate(lunedi.getDate() + 6);
-
   titolo.textContent = `Settimana: ${formatData(lunedi)} → ${formatData(domenica)}`;
 
   for (let i = 0; i < 7; i++) {
@@ -52,23 +52,22 @@ function creaGriglia() {
     if (i === 6) {
       div.classList.add('domenica');
     } else {
-      if (disponibilita[dataStr] === 2) {
-        div.classList.add('disponibilita-2');
-      } else if (disponibilita[dataStr] === 1) {
-        div.classList.add('disponibilita-1');
+      const utenti = disponibilitaTutte[dataStr] || [];
+
+      if (confermate.has(dataStr)) {
+        div.classList.add('confermata');
       }
 
-      if (selezioniUtente.has(dataStr)) {
+      if (selezionate.has(dataStr)) {
         div.classList.add('selezionato');
       }
 
       div.addEventListener('click', () => {
-        if (selezioniUtente.has(dataStr)) {
-          selezioniUtente.delete(dataStr);
+        if (selezionate.has(dataStr)) {
+          selezionate.delete(dataStr);
         } else {
-          selezioniUtente.add(dataStr);
+          selezionate.add(dataStr);
         }
-
         creaGriglia();
         aggiornaContatore();
       });
@@ -84,7 +83,8 @@ function creaGriglia() {
 document.addEventListener('DOMContentLoaded', async function () {
   const res = await fetch('/dati_disponibilita');
   const dati = await res.json();
-  Object.assign(disponibilita, dati);
+  disponibilitaTutte = dati.tutte;
+  dati.confermate.forEach(d => confermate.add(d));
 
   document.getElementById('prevBtn').addEventListener('click', () => {
     if (settimanaIndex > 0) {
@@ -103,29 +103,48 @@ document.addEventListener('DOMContentLoaded', async function () {
   });
 
   document.getElementById('inviaBtn').addEventListener('click', async () => {
-    for (let dataStr of selezioniUtente) {
-      const count = disponibilita[dataStr] || 0;
-      if (count < 2) {
-        disponibilita[dataStr] = count + 1;
-        await fetch('/aggiorna_disponibilita', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            data: dataStr,
-            disponibilita: disponibilita[dataStr]
-          })
-        });
+    const nuove = [];
+    const daRimuovere = [];
+
+    for (let data of selezionate) {
+      if (!confermate.has(data)) {
+        nuove.push(data);
       }
     }
 
-    selezioniUtente.clear();
+    for (let data of confermate) {
+      if (!selezionate.has(data)) {
+        daRimuovere.push(data);
+      }
+    }
+
+    await fetch('/aggiorna_disponibilita', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ aggiunte: nuove, rimosse: daRimuovere })
+    });
+
+    nuove.forEach(d => confermate.add(d));
+    daRimuovere.forEach(d => confermate.delete(d));
+    selezionate.clear();
+
     creaGriglia();
     aggiornaContatore();
-    alert("Disponibilità inviate con successo.");
+    mostraToast("Disponibilità aggiornata");
   });
 
   creaGriglia();
   aggiornaContatore();
 });
+
+function mostraToast(msg) {
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.classList.add('show'), 100);
+  setTimeout(() => {
+    toast.classList.remove('show');
+    toast.remove();
+  }, 2500);
+}
