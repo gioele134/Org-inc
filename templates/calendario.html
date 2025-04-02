@@ -2,85 +2,8 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Calendario Disponibilità Incentivazioni</title>
+  <title>Calendario Disponibilità</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      background-color: #f9f9f9;
-    }
-
-    header {
-      padding: 15px;
-      background-color: #0077cc;
-      color: white;
-      text-align: center;
-    }
-
-    a {
-      color: white;
-      text-decoration: underline;
-    }
-
-    .settimana {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      max-width: 400px;
-      margin: 20px auto;
-      gap: 0;
-      border: 1px solid #ccc;
-    }
-
-    .giorno {
-      padding: 25px 5px;
-      border: 1px solid #ccc;
-      font-weight: bold;
-      background-color: white;
-      box-sizing: border-box;
-    }
-
-    .giorno.disponibilita-1 {
-      background-color: rgba(0, 128, 0, 0.1); /* verde 10% */
-    }
-
-    .giorno.disponibilita-2 {
-      background-color: rgba(255, 165, 0, 0.1); /* arancione 10% */
-    }
-
-    .giorno.selezionato {
-      background-color: rgba(0, 128, 0, 0.8); /* verde 80% */
-      color: white;
-    }
-
-    .domenica {
-      grid-column: span 3;
-      background-color: rgba(255, 0, 0, 0.5) !important;
-      color: white;
-      pointer-events: none;
-      text-align: center;
-    }
-
-    .navigazione, .invia {
-      text-align: center;
-      margin: 15px 0;
-    }
-
-    button {
-      background-color: #0077cc;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      margin: 5px;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      background-color: #aaa;
-    }
-  </style>
 </head>
 <body>
   <header>
@@ -90,19 +13,20 @@
   </header>
 
   <div class="navigazione">
-  <button id="prevBtn">← Settimana precedente</button>
-  <span id="titoloSettimana"></span>
-  <button id="nextBtn">Settimana successiva →</button>
-  <div style="margin-top: 10px; font-weight: bold;">
-    Date selezionate: <span id="contatoreSelezioni">0</span>
+    <button id="prevBtn">← Settimana precedente</button>
+    <span id="titoloSettimana"></span>
+    <button id="nextBtn">Settimana successiva →</button>
+    <div class="contatore">
+      Date selezionate: <span id="contatoreSelezioni">0</span>
+    </div>
   </div>
-</div>
 
   <div class="settimana" id="griglia"></div>
 
   <div class="invia">
     <button id="inviaBtn">Invia</button>
   </div>
+
 <script>
   const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
   const disponibilita = {};
@@ -235,6 +159,8 @@
     creaGriglia();
     aggiornaContatore();
   });
-</script>      
+</script>
+  
+  <script src="{{ url_for('static', filename='calendar.js') }}"></script>
 </body>
 </html>
