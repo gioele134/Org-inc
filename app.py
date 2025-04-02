@@ -2,13 +2,13 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 import json
 from pathlib import Path
 import os
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
-app.secret_key = 'supersecretkey'  # cambia con una chiave sicura in produzione
-
+app.secret_key = 'supersecretkey'
 FILE_DISPONIBILITA = Path("disponibilita.json")
 
-# ------------------- Utilità -------------------
+# ------------------- Utility -------------------
 
 def carica_disponibilita():
     if FILE_DISPONIBILITA.exists():
@@ -20,20 +20,17 @@ def salva_disponibilita(dati):
     with open(FILE_DISPONIBILITA, "w") as f:
         json.dump(dati, f)
 
-# ------------------- Login / Logout -------------------
+# ------------------- Login -------------------
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-
-        # Per ora accettiamo qualsiasi combinazione
         if username and password:
             session['username'] = username
             return redirect(url_for('calendario'))
-        else:
-            return render_template('login.html', errore="Credenziali non valide")
+        return render_template('login.html', errore="Credenziali non valide")
     return render_template('login.html')
 
 @app.route('/logout')
@@ -49,8 +46,6 @@ def calendario():
         return redirect(url_for('login'))
     return render_template('calendario.html', username=session['username'])
 
-# ------------------- API: Dati disponibilità -------------------
-
 @app.route('/dati_disponibilita')
 def dati_disponibilita():
     username = session.get('username')
@@ -61,15 +56,11 @@ def dati_disponibilita():
         "confermate": confermate
     })
 
-# ------------------- API: Aggiorna disponibilità -------------------
-
 @app.route('/aggiorna_disponibilita', methods=['POST'])
 def aggiorna_disponibilita():
     username = session.get('username')
     dati = request.get_json()
     aggiunte = dati.get("aggiunte", [])
-    rimosse = dati.get("rimosse", [])
-
     tutte = carica_disponibilita()
 
     for data in aggiunte:
@@ -77,14 +68,58 @@ def aggiorna_disponibilita():
         if username not in tutte[data]:
             tutte[data].append(username)
 
-    for data in rimosse:
-        if data in tutte and username in tutte[data]:
-            tutte[data].remove(username)
-            if not tutte[data]:
-                del tutte[data]
-
     salva_disponibilita(tutte)
     return jsonify({"status": "ok"})
+
+# ------------------- Riepilogo -------------------
+
+@app.route('/riepilogo')
+def riepilogo():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    username = session['username']
+    dati = carica_disponibilita()
+
+    oggi = datetime.today()
+    lunedi_base = oggi - timedelta(days=oggi.weekday())
+    lunedi_base = lunedi_base.replace(hour=0, minute=0, second=0, microsecond=0)
+
+    settimana_index = int(request.args.get("settimana", 0))
+    lunedi_attivo = lunedi_base + timedelta(weeks=1 + settimana_index)
+    domenica_attiva = lunedi_attivo + timedelta(days=6)
+
+    disponibilita_settimanale = {
+        data: utenti for data, utenti in dati.items()
+        if lunedi_attivo <= datetime.fromisoformat(data) <= domenica_attiva
+    }
+
+    contatori = {}
+    for utenti in dati.values():
+        for u in utenti:
+            contatori[u] = contatori.get(u, 0) + 1
+
+    return render_template(
+        'riepilogo.html',
+        username=username,
+        disponibilita=disponibilita_settimanale,
+        settimana_index=settimana_index,
+        contatori=contatori
+    )
+
+@app.route('/elimina_disponibilita', methods=['POST'])
+def elimina_disponibilita():
+    username = session.get('username')
+    data = request.get_json().get('data')
+    tutte = carica_disponibilita()
+
+    if data in tutte and username in tutte[data]:
+        tutte[data].remove(username)
+        if not tutte[data]:
+            del tutte[data]
+        salva_disponibilita(tutte)
+        return jsonify({"status": "ok"})
+    return jsonify({"status": "not_found"}), 404
 
 # ------------------- Avvio -------------------
 
