@@ -1,156 +1,122 @@
-const giorni = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-const selezionate = new Set();
-const confermate = new Set();
+const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+let settimanaCorrente = 0;
+let selezionate = new Set();
+let confermate = new Set();
+let mappaDisponibilita = {};
 
-const oggi = new Date();
-const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
-const primoLunedi = new Date(lunediCorrente);
-primoLunedi.setDate(primoLunedi.getDate() + 7);
+document.addEventListener("DOMContentLoaded", async () => {
+  await caricaDati();
+  aggiornaSettimana();
+  document.getElementById("prevBtn").addEventListener("click", () => cambiaSettimana(-1));
+  document.getElementById("nextBtn").addEventListener("click", () => cambiaSettimana(1));
+  document.getElementById("inviaBtn").addEventListener("click", inviaSelezioni);
+});
 
-let settimanaIndex = 0;
-let disponibilitaTutte = {};
-
-function formatData(date) {
-  return date.toISOString().split('T')[0];
+async function caricaDati() {
+  const res = await fetch("/dati_disponibilita");
+  const dati = await res.json();
+  confermate = new Set(dati.confermate);
+  mappaDisponibilita = dati.tutte;
 }
 
-function etichettaGiorno(i, data) {
-  const numero = String(data.getDate()).padStart(2, '0');
-  return `${giorni[i]} ${numero}`;
+function cambiaSettimana(differenza) {
+  const nuovaSettimana = settimanaCorrente + differenza;
+  if (nuovaSettimana >= 0 && nuovaSettimana <= 3) {
+    settimanaCorrente = nuovaSettimana;
+    aggiornaSettimana();
+  }
 }
 
-function getLunediSettimana(i) {
-  const base = new Date(primoLunedi);
-  base.setDate(base.getDate() + (i * 7));
-  return base;
+function aggiornaSettimana() {
+  const griglia = document.getElementById("griglia");
+  griglia.innerHTML = "";
+  selezionate.clear();
+  aggiornaContatore();
+
+  const oggi = new Date();
+  const lunedi = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1 + settimanaCorrente * 7));
+
+  document.getElementById("titoloSettimana").textContent = `Settimana ${settimanaCorrente + 1}`;
+
+  for (let i = 0; i < 6; i++) {
+    const giorno = new Date(lunedi);
+    giorno.setDate(lunedi.getDate() + i);
+    const dataISO = giorno.toISOString().split('T')[0];
+    const label = `${giorniSettimana[giorno.getDay()]} ${String(giorno.getDate()).padStart(2, '0')}`;
+
+    const div = document.createElement("div");
+    div.classList.add("giorno");
+
+    if (confermate.has(dataISO)) {
+      div.classList.add("confermata");
+    } else {
+      div.addEventListener("click", () => toggleSelezione(div, dataISO));
+    }
+
+    const etichetta = document.createElement("div");
+    etichetta.classList.add("etichetta");
+    etichetta.textContent = label;
+
+    const conteggio = document.createElement("div");
+    conteggio.classList.add("conteggio");
+    conteggio.textContent = (mappaDisponibilita[dataISO] || []).length;
+
+    div.appendChild(etichetta);
+    div.appendChild(conteggio);
+    griglia.appendChild(div);
+  }
+
+  // Domenica
+  const domenica = new Date(lunedi);
+  domenica.setDate(lunedi.getDate() + 6);
+  const domLabel = `DOMENICA ${String(domenica.getDate()).padStart(2, '0')}`;
+
+  const divDom = document.createElement("div");
+  divDom.classList.add("domenica");
+  divDom.textContent = domLabel;
+  griglia.appendChild(divDom);
+}
+
+function toggleSelezione(div, data) {
+  if (selezionate.has(data)) {
+    selezionate.delete(data);
+    div.classList.remove("selezionato");
+  } else {
+    selezionate.add(data);
+    div.classList.add("selezionato");
+  }
+  aggiornaContatore();
 }
 
 function aggiornaContatore() {
-  document.getElementById('contatoreSelezioni').textContent = selezionate.size;
+  document.getElementById("contatoreSelezioni").textContent = selezionate.size;
 }
 
-function creaGriglia() {
-  const container = document.getElementById('griglia');
-  const titolo = document.getElementById('titoloSettimana');
-  container.innerHTML = '';
+async function inviaSelezioni() {
+  if (selezionate.size === 0) return;
 
-  const lunedi = getLunediSettimana(settimanaIndex);
-  const domenica = new Date(lunedi);
-  domenica.setDate(lunedi.getDate() + 6);
-  titolo.textContent = `Settimana: ${formatData(lunedi)} → ${formatData(domenica)}`;
-
-  for (let i = 0; i < 7; i++) {
-    const giornoData = new Date(lunedi);
-    giornoData.setDate(lunedi.getDate() + i);
-    const dataStr = formatData(giornoData);
-
-    const div = document.createElement('div');
-    div.classList.add('giorno');
-    div.dataset.data = dataStr;
-
-    const utenti = disponibilitaTutte[dataStr] || [];
-    const count = utenti.length;
-
-    // Testo visuale
-    const label = document.createElement('div');
-    label.classList.add('giorno-label');
-    label.textContent = etichettaGiorno(i, giornoData);
-
-    const counter = document.createElement('div');
-    counter.classList.add('giorno-count');
-    if (count > 0) counter.textContent = `${count} disponibilità`;
-
-    div.appendChild(label);
-    div.appendChild(counter);
-
-    if (i === 6) {
-      div.classList.add('domenica');
-    } else {
-      if (confermate.has(dataStr)) {
-        div.classList.add('confermata');
-      }
-
-      if (selezionate.has(dataStr)) {
-        div.classList.add('selezionato');
-      }
-
-      // Click solo se non confermata
-      if (!confermate.has(dataStr)) {
-        div.addEventListener('click', () => {
-          if (selezionate.has(dataStr)) {
-            selezionate.delete(dataStr);
-          } else {
-            selezionate.add(dataStr);
-          }
-          creaGriglia();
-          aggiornaContatore();
-        });
-      }
-    }
-
-    container.appendChild(div);
-  }
-
-  document.getElementById('prevBtn').disabled = settimanaIndex === 0;
-  document.getElementById('nextBtn').disabled = settimanaIndex === 4;
-}
-
-document.addEventListener('DOMContentLoaded', async function () {
-  const res = await fetch('/dati_disponibilita');
-  const dati = await res.json();
-  disponibilitaTutte = dati.tutte;
-  dati.confermate.forEach(d => confermate.add(d));
-
-  document.getElementById('prevBtn').addEventListener('click', () => {
-    if (settimanaIndex > 0) {
-      settimanaIndex--;
-      creaGriglia();
-      aggiornaContatore();
-    }
+  const res = await fetch("/aggiorna_disponibilita", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ aggiunte: [...selezionate] })
   });
 
-  document.getElementById('nextBtn').addEventListener('click', () => {
-    if (settimanaIndex < 4) {
-      settimanaIndex++;
-      creaGriglia();
-      aggiornaContatore();
-    }
-  });
-
-  document.getElementById('inviaBtn').addEventListener('click', async () => {
-    const nuove = [];
-    for (let data of selezionate) {
-      if (!confermate.has(data)) {
-        nuove.push(data);
-      }
-    }
-
-    await fetch('/aggiorna_disponibilita', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ aggiunte: nuove })
-    });
-
-    nuove.forEach(d => confermate.add(d));
-    selezionate.clear();
-
-    creaGriglia();
-    aggiornaContatore();
+  if (res.ok) {
     mostraToast("Disponibilità aggiornata");
-  });
-
-  creaGriglia();
-  aggiornaContatore();
-});
+    await caricaDati();
+    aggiornaSettimana();
+  }
+}
 
 function mostraToast(msg) {
-  const toast = document.createElement('div');
-  toast.className = 'toast';
+  let toast = document.getElementById("toast");
+  if (!toast) {
+    toast = document.createElement("div");
+    toast.id = "toast";
+    toast.classList.add("toast");
+    document.body.appendChild(toast);
+  }
   toast.textContent = msg;
-  document.body.appendChild(toast);
-  setTimeout(() => toast.classList.add('show'), 100);
-  setTimeout(() => {
-    toast.classList.remove('show');
-    toast.remove();
-  }, 2500);
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2000);
 }
