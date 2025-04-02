@@ -47,13 +47,25 @@ function creaGriglia() {
     const div = document.createElement('div');
     div.classList.add('giorno');
     div.dataset.data = dataStr;
-    div.textContent = etichettaGiorno(i, giornoData);
+
+    const utenti = disponibilitaTutte[dataStr] || [];
+    const count = utenti.length;
+
+    // Testo visuale
+    const label = document.createElement('div');
+    label.classList.add('giorno-label');
+    label.textContent = etichettaGiorno(i, giornoData);
+
+    const counter = document.createElement('div');
+    counter.classList.add('giorno-count');
+    if (count > 0) counter.textContent = `${count} disponibilità`;
+
+    div.appendChild(label);
+    div.appendChild(counter);
 
     if (i === 6) {
       div.classList.add('domenica');
     } else {
-      const utenti = disponibilitaTutte[dataStr] || [];
-
       if (confermate.has(dataStr)) {
         div.classList.add('confermata');
       }
@@ -62,15 +74,18 @@ function creaGriglia() {
         div.classList.add('selezionato');
       }
 
-      div.addEventListener('click', () => {
-        if (selezionate.has(dataStr)) {
-          selezionate.delete(dataStr);
-        } else {
-          selezionate.add(dataStr);
-        }
-        creaGriglia();
-        aggiornaContatore();
-      });
+      // Click solo se non confermata
+      if (!confermate.has(dataStr)) {
+        div.addEventListener('click', () => {
+          if (selezionate.has(dataStr)) {
+            selezionate.delete(dataStr);
+          } else {
+            selezionate.add(dataStr);
+          }
+          creaGriglia();
+          aggiornaContatore();
+        });
+      }
     }
 
     container.appendChild(div);
@@ -104,28 +119,19 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   document.getElementById('inviaBtn').addEventListener('click', async () => {
     const nuove = [];
-    const daRimuovere = [];
-
     for (let data of selezionate) {
       if (!confermate.has(data)) {
         nuove.push(data);
       }
     }
 
-    for (let data of confermate) {
-      if (!selezionate.has(data)) {
-        daRimuovere.push(data);
-      }
-    }
-
     await fetch('/aggiorna_disponibilita', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ aggiunte: nuove, rimosse: daRimuovere })
+      body: JSON.stringify({ aggiunte: nuove })
     });
 
     nuove.forEach(d => confermate.add(d));
-    daRimuovere.forEach(d => confermate.delete(d));
     selezionate.clear();
 
     creaGriglia();
