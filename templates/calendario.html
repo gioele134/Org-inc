@@ -14,19 +14,21 @@
     <a href="{{ url_for('riepilogo') }}">Riepilogo</a>
   </header>
 
-  <div class="navigazione">
-    <button id="prevBtn">← Settimana precedente</button>
-    <span id="titoloSettimana"></span>
-    <button id="nextBtn">Settimana successiva →</button>
-    <div class="contatore">
-      Date selezionate: <span id="contatoreSelezioni">0</span>
+  <div class="container">
+    <div class="navigazione">
+      <button id="prevBtn">← Settimana precedente</button>
+      <span id="titoloSettimana"></span>
+      <button id="nextBtn">Settimana successiva →</button>
+      <div class="contatore">
+        Date selezionate: <span id="contatoreSelezioni">0</span>
+      </div>
     </div>
-  </div>
 
-  <div class="settimana" id="griglia"></div>
+    <div class="settimana" id="griglia"></div>
 
-  <div class="invia">
-    <button id="inviaBtn">Invia</button>
+    <div class="invia">
+      <button id="inviaBtn">Invia</button>
+    </div>
   </div>
 
   <script src="{{ url_for('static', filename='calendar.js') }}"></script>
