@@ -1,21 +1,12 @@
 const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
 let settimanaCorrente = 0;
-let selezionate = {};  // { "2024-04-10": "M" }
+let selezionate = {};  // { "2025-04-10": "M" }
 let confermate = {};
-let mappaDisponibilita = {}; // { "2024-04-10": { M: 2, P: 1 } }
+let mappaDisponibilita = {}; // { "2025-04-10": { M: 2, P: 1 } }
 let giorniFestivi = [];
 
-function getNumeroSettimana(data) {
-  const d = new Date(Date.UTC(data.getFullYear(), data.getMonth(), data.getDate()));
-  const dayNum = d.getUTCDay() || 7;
-  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-}
-
 document.addEventListener("DOMContentLoaded", async () => {
-  const anno = new Date().getFullYear();
-  await caricaFestivi(anno);
+  await caricaFestivi();
   await caricaDati();
   aggiornaSettimana();
   document.getElementById("prevBtn").addEventListener("click", () => cambiaSettimana(-1));
@@ -23,19 +14,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("inviaBtn").addEventListener("click", inviaSelezioni);
 });
 
-async function caricaFestivi(anno) {
-  const cacheKey = `festivi-${anno}`;
-  const cache = localStorage.getItem(cacheKey);
-  if (cache) {
-    giorniFestivi = JSON.parse(cache);
-    return;
-  }
-
+async function caricaFestivi() {
+  const anno = new Date().getFullYear();
   try {
     const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${anno}/IT`);
     const dati = await res.json();
-    giorniFestivi = dati.map(d => d.date);
-    localStorage.setItem(cacheKey, JSON.stringify(giorniFestivi));
+    giorniFestivi = dati.map(g => g.date);
   } catch (err) {
     console.error("Errore nel caricamento dei festivi:", err);
     giorniFestivi = [];
@@ -70,8 +54,7 @@ function aggiornaSettimana() {
   const domenica = new Date(lunedi);
   domenica.setDate(domenica.getDate() + 6);
   const range = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
-  const numeroSettimana = getNumeroSettimana(lunedi);
-  document.getElementById("titoloSettimana").textContent = `Settimana ${numeroSettimana} — ${range}`;
+  document.getElementById("titoloSettimana").textContent = range;
 
   for (let i = 0; i < 6; i++) {
     const giorno = new Date(lunedi);
@@ -86,17 +69,6 @@ function aggiornaSettimana() {
     etichetta.classList.add("etichetta");
     etichetta.textContent = label;
 
-    if (giorniFestivi.includes(dataISO)) {
-      div.classList.add("festivo");
-      const msg = document.createElement("div");
-      msg.classList.add("festivo-label");
-      msg.textContent = "Festivo";
-      div.appendChild(etichetta);
-      div.appendChild(msg);
-      griglia.appendChild(div);
-      continue;
-    }
-
     const turniDiv = document.createElement("div");
     turniDiv.classList.add("turni");
 
@@ -104,6 +76,11 @@ function aggiornaSettimana() {
       const btn = document.createElement("button");
       btn.classList.add("turno-btn");
       btn.textContent = turno;
+
+      if (giorniFestivi.includes(dataISO)) {
+        btn.classList.add("festivo");
+        btn.disabled = true;
+      }
 
       if (confermate[dataISO] === turno) {
         btn.classList.add("selezionato");
@@ -128,8 +105,8 @@ function aggiornaSettimana() {
 
     const conteggio = document.createElement("div");
     conteggio.classList.add("conteggio");
-    const contM = (mappaDisponibilita[dataISO]?.M || 0);
-    const contP = (mappaDisponibilita[dataISO]?.P || 0);
+    const contM = mappaDisponibilita[dataISO]?.M || 0;
+    const contP = mappaDisponibilita[dataISO]?.P || 0;
     conteggio.textContent = `M: ${contM} / P: ${contP}`;
 
     div.appendChild(etichetta);
