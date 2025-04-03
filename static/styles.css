@@ -6,15 +6,41 @@ body {
 }
 
 header {
-  background: #0077cc;
-  color: white;
-  text-align: center;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: white;
   padding: 1rem;
+  z-index: 9999;
+  border-bottom: 1px solid #ccc;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+header nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  gap: 1rem;
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
 
 header a {
-  color: white;
-  margin: 0 10px;
+  color: #0077cc;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+header a:hover {
   text-decoration: underline;
 }
 
@@ -27,17 +53,31 @@ header a {
 .navigazione {
   text-align: center;
   margin-bottom: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
 }
 
 .navigazione button {
   background: #0077cc;
   color: white;
   border: none;
-  padding: 0.4rem 0.8rem;
-  margin: 0.2rem;
-  border-radius: 4px;
+  padding: 0.5rem 1rem;
   font-size: 0.9rem;
+  border-radius: 6px;
   cursor: pointer;
+}
+
+.navigazione button:disabled {
+  background-color: #ccc;
+  cursor: default;
+}
+
+#titoloSettimana {
+  font-weight: bold;
+  font-size: 1rem;
 }
 
 .contatore {
@@ -218,6 +258,7 @@ header a {
   margin-bottom: 0.5rem;
 }
 
+/* Festivi */
 .festivo {
   background-color: rgba(255, 0, 0, 0.2);
   pointer-events: none;
@@ -231,7 +272,7 @@ header a {
   text-align: center;
 }
 
-/* Sezione riepilogo */
+/* Riepilogo */
 .riepilogo {
   max-width: 600px;
   margin: 2rem auto;
@@ -269,67 +310,4 @@ header a {
 .giorno-riepilogo div {
   font-size: 0.95rem;
   margin-bottom: 0.3rem;
-}
-
-.navigazione {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 0.8rem;
-  margin: 1.5rem auto;
-  text-align: center;
-  flex-wrap: wrap;
-}
-
-.navigazione button {
-  padding: 0.5rem 1rem;
-  font-size: 0.9rem;
-  background-color: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.navigazione button:disabled {
-  background-color: #ccc;
-  cursor: default;
-}
-
-#titoloSettimana {
-  font-weight: bold;
-  font-size: 1rem;
-}
-
-/* Header sticky */
-header {
-  position: sticky;
-  top: 0;
-  background-color: white;
-  padding: 1rem;
-  z-index: 1000;
-  border-bottom: 1px solid #ccc;
-}
-
-header h2 {
-  margin: 0;
-  font-size: 1.2rem;
-}
-
-header nav {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 0.5rem;
-}
-
-.link-calendario {
-  color: #0077cc;
-  text-decoration: none;
-  font-weight: bold;
-  font-size: 0.95rem;
-}
-
-.link-calendario:hover {
-  text-decoration: underline;
 }
