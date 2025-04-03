@@ -3,14 +3,44 @@ let settimanaCorrente = 0;
 let selezionate = {};  // { "2024-04-10": "M" }
 let confermate = {};
 let mappaDisponibilita = {}; // { "2024-04-10": { M: 2, P: 1 } }
+let giorniFestivi = [];
+
+function getNumeroSettimana(data) {
+  const d = new Date(Date.UTC(data.getFullYear(), data.getMonth(), data.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
+  const anno = new Date().getFullYear();
+  await caricaFestivi(anno);
   await caricaDati();
   aggiornaSettimana();
   document.getElementById("prevBtn").addEventListener("click", () => cambiaSettimana(-1));
   document.getElementById("nextBtn").addEventListener("click", () => cambiaSettimana(1));
   document.getElementById("inviaBtn").addEventListener("click", inviaSelezioni);
 });
+
+async function caricaFestivi(anno) {
+  const cacheKey = `festivi-${anno}`;
+  const cache = localStorage.getItem(cacheKey);
+  if (cache) {
+    giorniFestivi = JSON.parse(cache);
+    return;
+  }
+
+  try {
+    const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${anno}/IT`);
+    const dati = await res.json();
+    giorniFestivi = dati.map(d => d.date);
+    localStorage.setItem(cacheKey, JSON.stringify(giorniFestivi));
+  } catch (err) {
+    console.error("Errore nel caricamento dei festivi:", err);
+    giorniFestivi = [];
+  }
+}
 
 async function caricaDati() {
   const res = await fetch("/dati_disponibilita_turni");
@@ -35,12 +65,13 @@ function aggiornaSettimana() {
   const oggi = new Date();
   const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
   const lunedi = new Date(lunediCorrente);
-  lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1));  // +1 per escludere la settimana attuale
+  lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1));
 
   const domenica = new Date(lunedi);
   domenica.setDate(domenica.getDate() + 6);
   const range = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
-  document.getElementById("titoloSettimana").textContent = range;
+  const numeroSettimana = getNumeroSettimana(lunedi);
+  document.getElementById("titoloSettimana").textContent = `Settimana ${numeroSettimana} — ${range}`;
 
   for (let i = 0; i < 6; i++) {
     const giorno = new Date(lunedi);
@@ -55,6 +86,17 @@ function aggiornaSettimana() {
     etichetta.classList.add("etichetta");
     etichetta.textContent = label;
 
+    if (giorniFestivi.includes(dataISO)) {
+      div.classList.add("festivo");
+      const msg = document.createElement("div");
+      msg.classList.add("festivo-label");
+      msg.textContent = "Festivo";
+      div.appendChild(etichetta);
+      div.appendChild(msg);
+      griglia.appendChild(div);
+      continue;
+    }
+
     const turniDiv = document.createElement("div");
     turniDiv.classList.add("turni");
 
@@ -63,18 +105,15 @@ function aggiornaSettimana() {
       btn.classList.add("turno-btn");
       btn.textContent = turno;
 
-      // Se già confermata (inviata), disabilita
       if (confermate[dataISO] === turno) {
         btn.classList.add("selezionato");
         btn.disabled = true;
       }
 
-      // Se selezionata (non ancora inviata), evidenzia
       if (selezionate[dataISO] === turno) {
         btn.classList.add("selezionato");
       }
 
-      // Gestione click
       btn.addEventListener("click", () => {
         if (selezionate[dataISO] === turno) {
           delete selezionate[dataISO];
@@ -99,7 +138,6 @@ function aggiornaSettimana() {
     griglia.appendChild(div);
   }
 
-  // DOMENICA
   const dom = new Date(domenica);
   const domLabel = `DOMENICA ${String(dom.getDate()).padStart(2, "0")}`;
   const divDom = document.createElement("div");
