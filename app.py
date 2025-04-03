@@ -139,20 +139,20 @@ def riepilogo():
 
         giorni_it = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO"]
 
-        for offset in range(6):  # lun-sab
+        for offset in range(6):
             giorno = lunedi + timedelta(days=offset)
-            data_str = giorno.strftime("%Y-%m-%d")  # ISO 8601
-            giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"  # Es: "LUNEDÌ 08"
+            data_iso = giorno.strftime("%Y-%m-%d")
+            giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
 
-            # Recupera utenti per M e P
-            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_str,))
+            # Recupera gli utenti che hanno dato disponibilità
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_iso,))
             m = [r["utente"] for r in cur.fetchall()]
-            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_str,))
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_iso,))
             p = [r["utente"] for r in cur.fetchall()]
 
             settimana_data["giorni"].append({
-                "label": giorno_label,   # Per visualizzazione
-                "iso": data_str,         # Per uso interno nei form
+                "data": giorno_label,
+                "data_iso": data_iso,  # <-- valore corretto per i form
                 "M": m if m else None,
                 "P": p if p else None
             })
