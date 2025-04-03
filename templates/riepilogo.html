@@ -2,41 +2,67 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Riepilogo Disponibilità</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Riepilogo disponibilità</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
   <header>
     <h2>Riepilogo Disponibilità</h2>
     <nav>
-      <a href="{{ url_for('calendario') }}" class="link-calendario">← Torna al Calendario</a>
+      <a class="link-calendario" href="{{ url_for('calendario') }}">← Torna al calendario</a>
       <a href="{{ url_for('logout') }}">Logout</a>
     </nav>
   </header>
 
-  <div class="navigazione">
-    <button id="prevBtn">← Settimana precedente</button>
-    <span id="titoloSettimana"></span>
-    <button id="nextBtn">Settimana successiva →</button>
-  </div>
-
-  <main class="riepilogo">
+  <div class="riepilogo">
     {% for settimana in settimane %}
-      <section class="settimana" data-settimana="{{ loop.index0 }}" style="{% if not loop.first %}display:none{% endif %}">
+      <div class="settimana">
         <h3>Settimana {{ settimana.numero }} — dal {{ settimana.inizio }} al {{ settimana.fine }}</h3>
-
+        
         {% for giorno in settimana.giorni %}
           <div class="giorno-riepilogo">
-            <strong>{{ giorno.data }}</strong><br>
-            <div>M: {{ giorno.M | join(', ') if giorno.M else "nessuno" }}</div>
-            <div>P: {{ giorno.P | join(', ') if giorno.P else "nessuno" }}</div>
+            <strong>{{ giorno.data }}</strong>
+            
+            <div>
+              <b>M:</b>
+              {% if giorno.M %}
+                {% for utente in giorno.M %}
+                  {{ utente }}
+                  {% if utente == username %}
+                    <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
+                      <input type="hidden" name="data" value="{{ giorno.data.split(' ')[1] }}/{{ settimana.inizio.split('/')[1] }}/20{{ settimana.inizio.split('/')[2] }}">
+                      <input type="hidden" name="turno" value="M">
+                      <button type="submit">✖</button>
+                    </form>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                nessuno
+              {% endif %}
+            </div>
+
+            <div>
+              <b>P:</b>
+              {% if giorno.P %}
+                {% for utente in giorno.P %}
+                  {{ utente }}
+                  {% if utente == username %}
+                    <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
+                      <input type="hidden" name="data" value="{{ giorno.data.split(' ')[1] }}/{{ settimana.inizio.split('/')[1] }}/20{{ settimana.inizio.split('/')[2] }}">
+                      <input type="hidden" name="turno" value="P">
+                      <button type="submit">✖</button>
+                    </form>
+                  {% endif %}
+                {% endfor %}
+              {% else %}
+                nessuno
+              {% endif %}
+            </div>
           </div>
         {% endfor %}
-      </section>
+      </div>
     {% endfor %}
-  </main>
-
-  <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
+  </div>
 </body>
 </html>
