@@ -9,7 +9,10 @@
 <body>
   <header>
     <h2>Riepilogo Disponibilità</h2>
-    <a href="{{ url_for('logout') }}">Logout</a>
+    <nav>
+      <a href="{{ url_for('calendario') }}" class="link-calendario">← Torna al Calendario</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
   </header>
 
   <div class="navigazione">
