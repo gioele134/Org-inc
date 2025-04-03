@@ -300,3 +300,36 @@ header a {
   font-weight: bold;
   font-size: 1rem;
 }
+
+/* Header sticky */
+header {
+  position: sticky;
+  top: 0;
+  background-color: white;
+  padding: 1rem;
+  z-index: 1000;
+  border-bottom: 1px solid #ccc;
+}
+
+header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+header nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.link-calendario {
+  color: #0077cc;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.link-calendario:hover {
+  text-decoration: underline;
+}
