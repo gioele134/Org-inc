@@ -230,3 +230,73 @@ header a {
   font-weight: bold;
   text-align: center;
 }
+
+/* Sezione riepilogo */
+.riepilogo {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: sans-serif;
+}
+
+.settimana {
+  margin-bottom: 2.5rem;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.settimana h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #333;
+}
+
+.giorno-riepilogo {
+  padding: 0.6rem;
+  border-top: 1px solid #ddd;
+}
+
+.giorno-riepilogo strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: #0077cc;
+}
+
+.giorno-riepilogo div {
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+.navigazione {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.8rem;
+  margin: 1.5rem auto;
+  text-align: center;
+  flex-wrap: wrap;
+}
+
+.navigazione button {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.navigazione button:disabled {
+  background-color: #ccc;
+  cursor: default;
+}
+
+#titoloSettimana {
+  font-weight: bold;
+  font-size: 1rem;
+}
