@@ -350,3 +350,18 @@ header nav a:hover {
   font-weight: bold;
   color: #0077cc;
 }
+
+.barra-fissa .navigazione button {
+  background: #0077cc;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.9rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.barra-fissa .navigazione button:disabled {
+  background-color: #ccc;
+  cursor: default;
+}
