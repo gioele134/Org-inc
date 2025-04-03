@@ -92,7 +92,6 @@ def aggiorna_disponibilita_turni():
     salva_disponibilita(dati)
     return "", 204
 
-# --- Riepilogo settimanale ---
 @app.route("/riepilogo")
 def riepilogo():
     if "username" not in session:
@@ -123,12 +122,9 @@ def riepilogo():
             m = []
             p = []
 
-            for utente, disponibilita_utente in dati.items():
-                if data_str in disponibilita_utente:
-                    if "M" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["M"]:
-                        m.append(utente)
-                    if "P" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["P"]:
-                        p.append(utente)
+            if data_str in dati:
+                m = dati[data_str].get("M", [])
+                p = dati[data_str].get("P", [])
 
             settimana_data["giorni"].append({
                 "data": giorno_label,
