@@ -1,8 +1,8 @@
 const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
 let settimanaCorrente = 0;
-let selezionate = {};  // { "2025-04-10": "M" }
+let selezionate = {};  // { "2024-04-10": "M" }
 let confermate = {};
-let mappaDisponibilita = {}; // { "2025-04-10": { M: 2, P: 1 } }
+let mappaDisponibilita = {}; // { "2024-04-10": { M: 2, P: 1 } }
 let giorniFestivi = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -13,18 +13,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("nextBtn").addEventListener("click", () => cambiaSettimana(1));
   document.getElementById("inviaBtn").addEventListener("click", inviaSelezioni);
 });
-
-async function caricaFestivi() {
-  const anno = new Date().getFullYear();
-  try {
-    const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${anno}/IT`);
-    const dati = await res.json();
-    giorniFestivi = dati.map(g => g.date);
-  } catch (err) {
-    console.error("Errore nel caricamento dei festivi:", err);
-    giorniFestivi = [];
-  }
-}
 
 async function caricaDati() {
   const res = await fetch("/dati_disponibilita_turni");
@@ -61,9 +49,11 @@ function aggiornaSettimana() {
     giorno.setDate(giorno.getDate() + i);
     const dataISO = giorno.toISOString().split("T")[0];
     const label = `${giorniSettimana[giorno.getDay()]} ${String(giorno.getDate()).padStart(2, "0")}`;
+    const èFestivo = giorniFestivi.includes(dataISO);
 
     const div = document.createElement("div");
     div.classList.add("giorno");
+    if (èFestivo) div.classList.add("festivo");
 
     const etichetta = document.createElement("div");
     etichetta.classList.add("etichetta");
@@ -77,11 +67,6 @@ function aggiornaSettimana() {
       btn.classList.add("turno-btn");
       btn.textContent = turno;
 
-      if (giorniFestivi.includes(dataISO)) {
-        btn.classList.add("festivo");
-        btn.disabled = true;
-      }
-
       if (confermate[dataISO] === turno) {
         btn.classList.add("selezionato");
         btn.disabled = true;
@@ -92,6 +77,7 @@ function aggiornaSettimana() {
       }
 
       btn.addEventListener("click", () => {
+        if (btn.disabled || èFestivo) return;
         if (selezionate[dataISO] === turno) {
           delete selezionate[dataISO];
         } else {
@@ -100,13 +86,15 @@ function aggiornaSettimana() {
         aggiornaSettimana();
       });
 
+      btn.dataset.data = dataISO;
+      btn.dataset.turno = turno;
       turniDiv.appendChild(btn);
     });
 
     const conteggio = document.createElement("div");
     conteggio.classList.add("conteggio");
-    const contM = mappaDisponibilita[dataISO]?.M || 0;
-    const contP = mappaDisponibilita[dataISO]?.P || 0;
+    const contM = (mappaDisponibilita[dataISO]?.M || 0);
+    const contP = (mappaDisponibilita[dataISO]?.P || 0);
     conteggio.textContent = `M: ${contM} / P: ${contP}`;
 
     div.appendChild(etichetta);
@@ -160,4 +148,10 @@ function mostraToast(msg) {
 
 function formattaDataBreve(data) {
   return `${String(data.getDate()).padStart(2, "0")} ${data.toLocaleString("it-IT", { month: "short" })}`;
+}
+
+async function caricaFestivi() {
+  const res = await fetch("https://date.nager.at/api/v3/PublicHolidays/2024/IT");
+  const json = await res.json();
+  giorniFestivi = json.map(f => f.date);
 }
