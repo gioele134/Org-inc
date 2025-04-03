@@ -9,53 +9,23 @@
 <body>
   <header>
     <h2>Riepilogo Disponibilità</h2>
-    <p>Utente: {{ username }}</p>
-    <a href="{{ url_for('calendario') }}">Torna al calendario</a>
     <a href="{{ url_for('logout') }}">Logout</a>
   </header>
 
-  <div class="container">
-    {% if disponibilita %}
-      <ul class="riepilogo-lista">
-        {% for data, entries in disponibilita|dictsort %}
-          <li>
-            <strong>{{ data }}</strong>
-            <div><em>Mattina</em>:</div>
-            <ul>
-              {% for user, turno in entries if turno == 'M' %}
-                <li class="utente-riga">
-                  {{ user }}
-                  {% if user == username %}
-                    <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}">
-                      <input type="hidden" name="data" value="{{ data }}">
-                      <input type="hidden" name="turno" value="M">
-                      <button class="elimina-btn" type="submit">Rimuovi</button>
-                    </form>
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-            <div><em>Pomeriggio</em>:</div>
-            <ul>
-              {% for user, turno in entries if turno == 'P' %}
-                <li class="utente-riga">
-                  {{ user }}
-                  {% if user == username %}
-                    <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}">
-                      <input type="hidden" name="data" value="{{ data }}">
-                      <input type="hidden" name="turno" value="P">
-                      <button class="elimina-btn" type="submit">Rimuovi</button>
-                    </form>
-                  {% endif %}
-                </li>
-              {% endfor %}
-            </ul>
-          </li>
+  <main class="riepilogo">
+    {% for settimana in settimane %}
+      <section class="settimana">
+        <h3>Settimana {{ settimana.numero }} — dal {{ settimana.inizio }} al {{ settimana.fine }}</h3>
+
+        {% for giorno in settimana.giorni %}
+          <div class="giorno-riepilogo">
+            <strong>{{ giorno.data }}</strong><br>
+            <div>M: {{ giorno.M | join(', ') if giorno.M else "nessuno" }}</div>
+            <div>P: {{ giorno.P | join(', ') if giorno.P else "nessuno" }}</div>
+          </div>
         {% endfor %}
-      </ul>
-    {% else %}
-      <p>Nessuna disponibilità registrata.</p>
-    {% endif %}
-  </div>
+      </section>
+    {% endfor %}
+  </main>
 </body>
 </html>
