@@ -1,27 +1,40 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
-import json
+import sqlite3
 import os
 from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "tua-chiave-super-segreta"
 
-PATH_FILE = "disponibilita.json"
+# --- Inizializzazione DB (creazione automatica su Render) ---
+def inizializza_db():
+    conn = sqlite3.connect("disponibilita.db")
+    c = conn.cursor()
+    c.execute('''
+        CREATE TABLE IF NOT EXISTS disponibilita (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            utente TEXT NOT NULL,
+            data TEXT NOT NULL,
+            turno TEXT NOT NULL,
+            inserito_il TEXT DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE(utente, data)
+        )
+    ''')
+    conn.commit()
+    conn.close()
+
+inizializza_db()
+
+# --- Utility DB ---
+def get_db_connection():
+    conn = sqlite3.connect("disponibilita.db")
+    conn.row_factory = sqlite3.Row
+    return conn
+
 UTENTI = {
     "gioele": "1234",
     "admin": "adminpass"
 }
-
-# --- Utility ---
-def carica_disponibilita():
-    if not os.path.exists(PATH_FILE):
-        return {}
-    with open(PATH_FILE, "r") as f:
-        return json.load(f)
-
-def salva_disponibilita(dati):
-    with open(PATH_FILE, "w") as f:
-        json.dump(dati, f, indent=2)
 
 # --- Login ---
 @app.route("/", methods=["GET", "POST"])
@@ -54,18 +67,28 @@ def dati_disponibilita_turni():
         return jsonify({})
 
     username = session["username"]
-    disponibilita = carica_disponibilita()
+    conn = get_db_connection()
+    cur = conn.cursor()
 
-    confermate = {
-        data: turno
-        for data, turni in disponibilita.items()
-        for turno, utenti in turni.items()
-        if username in utenti
-    }
+    # Turni confermati dell'utente
+    cur.execute("SELECT data, turno FROM disponibilita WHERE utente=?", (username,))
+    confermate_raw = cur.fetchall()
+    confermate = {r["data"]: r["turno"] for r in confermate_raw}
+
+    # Conteggi totali per ogni data e turno
+    cur.execute("SELECT data, turno, COUNT(*) as totale FROM disponibilita GROUP BY data, turno")
+    tutte_raw = cur.fetchall()
+    tutte = {}
+    for r in tutte_raw:
+        giorno = r["data"]
+        turno = r["turno"]
+        tutte.setdefault(giorno, {})[turno] = r["totale"]
+
+    conn.close()
 
     return jsonify({
         "confermate": confermate,
-        "tutte": disponibilita
+        "tutte": tutte
     })
 
 # --- Aggiorna turni ---
@@ -76,28 +99,35 @@ def aggiorna_disponibilita_turni():
 
     username = session["username"]
     selezioni = request.json.get("selezioni", [])
-    dati = carica_disponibilita()
+    conn = get_db_connection()
+    cur = conn.cursor()
 
     for sel in selezioni:
         data = sel["data"]
         turno = sel["turno"]
 
-        if data not in dati:
-            dati[data] = {"M": [], "P": []}
-        for t in ["M", "P"]:
-            if username in dati[data][t]:
-                dati[data][t].remove(username)
-        dati[data][turno].append(username)
+        # Rimuovi eventuale selezione precedente per quella data
+        cur.execute("DELETE FROM disponibilita WHERE utente=? AND data=?", (username, data))
 
-    salva_disponibilita(dati)
+        # Aggiungi nuova selezione
+        cur.execute(
+            "INSERT INTO disponibilita (utente, data, turno) VALUES (?, ?, ?)",
+            (username, data, turno)
+        )
+
+    conn.commit()
+    conn.close()
     return "", 204
 
+# --- Riepilogo settimanale ---
 @app.route("/riepilogo")
 def riepilogo():
     if "username" not in session:
         return redirect(url_for("login"))
 
-    dati = carica_disponibilita()
+    conn = get_db_connection()
+    cur = conn.cursor()
+
     oggi = datetime.today()
     lunedi_corrente = oggi - timedelta(days=oggi.weekday())
     settimane = []
@@ -114,17 +144,16 @@ def riepilogo():
 
         giorni_it = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO"]
 
-        for offset in range(6):  # lun-sab
+        for offset in range(6):
             giorno = lunedi + timedelta(days=offset)
             data_str = giorno.strftime("%Y-%m-%d")
             giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
 
-            m = []
-            p = []
-
-            if data_str in dati:
-                m = dati[data_str].get("M", [])
-                p = dati[data_str].get("P", [])
+            # Recupera gli utenti che hanno dato disponibilità
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_str,))
+            m = [r["utente"] for r in cur.fetchall()]
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_str,))
+            p = [r["utente"] for r in cur.fetchall()]
 
             settimana_data["giorni"].append({
                 "data": giorno_label,
@@ -134,6 +163,7 @@ def riepilogo():
 
         settimane.append(settimana_data)
 
+    conn.close()
     return render_template("riepilogo.html", settimane=settimane)
 
 # --- Rimuovi disponibilità ---
@@ -146,11 +176,14 @@ def rimuovi_disponibilita():
     data = request.form.get("data")
     turno = request.form.get("turno")
 
-    dati = carica_disponibilita()
-    if data in dati and turno in dati[data]:
-        if username in dati[data][turno]:
-            dati[data][turno].remove(username)
-            salva_disponibilita(dati)
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "DELETE FROM disponibilita WHERE utente=? AND data=? AND turno=?",
+        (username, data, turno)
+    )
+    conn.commit()
+    conn.close()
 
     return redirect(url_for("riepilogo"))
 
