@@ -115,19 +115,31 @@ def rimuovi_disponibilita():
     return redirect(url_for("riepilogo"))
 
 # --- Riepilogo ---
+import requests
+
+SUPABASE_URL = "https://obeqzopopwfvkugojggs.supabase.co"
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."  # (usa il tuo valore intero qui)
+
 @app.route("/riepilogo")
 def riepilogo():
     if "username" not in session:
         return redirect(url_for("login"))
 
-    conn = get_db_connection()
-    cur = conn.cursor()
-
     oggi = datetime.today()
     lunedi_corrente = oggi - timedelta(days=oggi.weekday())
     settimane = []
 
-    for i in range(1, 6):  # da settimana prossima a +5
+    headers = {
+        "apikey": SUPABASE_KEY,
+        "Authorization": f"Bearer {SUPABASE_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    # Prendiamo tutti i dati in un'unica chiamata
+    response = requests.get(f"{SUPABASE_URL}/rest/v1/disponibilita?select=*", headers=headers)
+    disponibilita = response.json() if response.status_code == 200 else []
+
+    for i in range(1, 6):
         lunedi = lunedi_corrente + timedelta(weeks=i)
         domenica = lunedi + timedelta(days=6)
         settimana_data = {
@@ -138,29 +150,25 @@ def riepilogo():
         }
 
         giorni_it = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO"]
-
         for offset in range(6):
             giorno = lunedi + timedelta(days=offset)
-            data_iso = giorno.strftime("%Y-%m-%d")
+            data_str = giorno.strftime("%Y-%m-%d")
             giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
 
-            # Recupera utenti per M e P
-            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_iso,))
-            m = [r["utente"] for r in cur.fetchall()]
-            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_iso,))
-            p = [r["utente"] for r in cur.fetchall()]
+            m = [r["utente"] for r in disponibilita if r["data"] == data_str and r["turno"] == "M"]
+            p = [r["utente"] for r in disponibilita if r["data"] == data_str and r["turno"] == "P"]
 
             settimana_data["giorni"].append({
                 "data": giorno_label,
-                "data_iso": data_iso,
+                "data_iso": data_str,
                 "M": m if m else None,
                 "P": p if p else None
             })
 
         settimane.append(settimana_data)
 
-    conn.close()
     return render_template("riepilogo.html", settimane=settimane, username=session["username"])
+
 # --- Avvio ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
