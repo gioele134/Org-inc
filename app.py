@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 app.secret_key = "tua-chiave-super-segreta"
@@ -92,22 +92,50 @@ def aggiorna_disponibilita_turni():
     salva_disponibilita(dati)
     return "", 204
 
-# --- Riepilogo ---
+# --- Riepilogo settimanale ---
 @app.route("/riepilogo")
 def riepilogo():
     if "username" not in session:
         return redirect(url_for("login"))
-    
-    username = session["username"]
+
     dati = carica_disponibilita()
+    oggi = datetime.today()
+    lunedi_corrente = oggi - timedelta(days=oggi.weekday())
+    settimane = []
 
-    riepilogo = {}
-    for data, turni in dati.items():
-        for turno, utenti in turni.items():
-            for u in utenti:
-                riepilogo.setdefault(data, []).append((u, turno))
+    for i in range(1, 6):  # da settimana prossima a +5
+        lunedi = lunedi_corrente + timedelta(weeks=i)
+        domenica = lunedi + timedelta(days=6)
+        settimana_data = {
+            "numero": lunedi.isocalendar()[1],
+            "inizio": lunedi.strftime("%d/%m/%y"),
+            "fine": domenica.strftime("%d/%m/%y"),
+            "giorni": []
+        }
 
-    return render_template("riepilogo.html", username=username, disponibilita=riepilogo)
+        for offset in range(6):  # lun-sab
+            giorno = lunedi + timedelta(days=offset)
+            data_str = giorno.strftime("%Y-%m-%d")
+            giorno_label = giorno.strftime("%A").upper() + " " + giorno.strftime("%d")
+            m = []
+            p = []
+
+            for utente, disponibilita_utente in dati.items():
+                if data_str in disponibilita_utente:
+                    if "M" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["M"]:
+                        m.append(utente)
+                    if "P" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["P"]:
+                        p.append(utente)
+
+            settimana_data["giorni"].append({
+                "data": giorno_label,
+                "M": m if m else None,
+                "P": p if p else None
+            })
+
+        settimane.append(settimana_data)
+
+    return render_template("riepilogo.html", settimane=settimane)
 
 # --- Rimuovi disponibilità ---
 @app.route("/rimuovi_disponibilita", methods=["POST"])
