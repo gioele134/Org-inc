@@ -217,3 +217,16 @@ header a {
   border-radius: 4px;
   margin-bottom: 0.5rem;
 }
+
+.festivo {
+  background-color: rgba(255, 0, 0, 0.2);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.festivo-label {
+  font-size: 0.9rem;
+  color: #a00;
+  font-weight: bold;
+  text-align: center;
+}
