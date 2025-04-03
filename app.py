@@ -144,7 +144,7 @@ def riepilogo():
             data_iso = giorno.strftime("%Y-%m-%d")
             giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
 
-            # Recupera gli utenti che hanno dato disponibilità
+            # Recupera utenti per M e P
             cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_iso,))
             m = [r["utente"] for r in cur.fetchall()]
             cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_iso,))
@@ -152,7 +152,7 @@ def riepilogo():
 
             settimana_data["giorni"].append({
                 "data": giorno_label,
-                "data_iso": data_iso,  # <-- valore corretto per i form
+                "data_iso": data_iso,
                 "M": m if m else None,
                 "P": p if p else None
             })
@@ -161,7 +161,6 @@ def riepilogo():
 
     conn.close()
     return render_template("riepilogo.html", settimane=settimane, username=session["username"])
-
 # --- Avvio ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
