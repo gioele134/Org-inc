@@ -15,9 +15,15 @@
     </nav>
   </header>
 
-  <div class="riepilogo">
+  <div class="navigazione">
+    <button id="prevSettimana">← Settimana precedente</button>
+    <span id="titoloSettimana"></span>
+    <button id="nextSettimana">Settimana successiva →</button>
+  </div>
+
+  <div id="settimaneContainer" class="riepilogo">
     {% for settimana in settimane %}
-      <div class="settimana">
+      <div class="settimana" data-index="{{ loop.index0 }}">
         <h3>Settimana {{ settimana.numero }} — dal {{ settimana.inizio }} al {{ settimana.fine }}</h3>
         
         {% for giorno in settimana.giorni %}
@@ -64,5 +70,7 @@
       </div>
     {% endfor %}
   </div>
+
+  <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
