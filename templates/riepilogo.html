@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Riepilogo disponibilità</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
   <header>
@@ -23,13 +23,13 @@
 
   <div id="settimaneContainer" class="riepilogo">
     {% for settimana in settimane %}
-      <div class="settimana" data-index="{{ loop.index0 }}">
+      <div class="settimana" data-index="{{ loop.index0 }}" style="{% if not loop.first %}display: none;{% endif %}">
         <h3>Settimana {{ settimana.numero }} — dal {{ settimana.inizio }} al {{ settimana.fine }}</h3>
         
         {% for giorno in settimana.giorni %}
           <div class="giorno-riepilogo">
             <strong>{{ giorno.data }}</strong>
-            
+
             <div>
               <b>M:</b>
               {% if giorno.M %}
@@ -37,7 +37,7 @@
                   {{ utente }}
                   {% if utente == username %}
                     <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
-                      <input type="hidden" name="data" value="{{ giorno.data_iso }}">
+                      <input type="hidden" name="data" value="{{ giorno.iso }}">
                       <input type="hidden" name="turno" value="M">
                       <button type="submit" class="rimuovi-btn">✖</button>
                     </form>
@@ -55,7 +55,7 @@
                   {{ utente }}
                   {% if utente == username %}
                     <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
-                      <input type="hidden" name="data" value="{{ giorno.data_iso }}">
+                      <input type="hidden" name="data" value="{{ giorno.iso }}">
                       <input type="hidden" name="turno" value="P">
                       <button type="submit" class="rimuovi-btn">✖</button>
                     </form>
@@ -71,7 +71,7 @@
     {% endfor %}
   </div>
 
-  <div id="toast" class="toast">Turno rimosso</div>
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
+  <div id="toast" class="toast">Turno rimosso</div>
 </body>
 </html>
