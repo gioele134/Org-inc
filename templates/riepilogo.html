@@ -25,11 +25,11 @@
     {% for settimana in settimane %}
       <div class="settimana" data-index="{{ loop.index0 }}">
         <h3>Settimana {{ settimana.numero }} — dal {{ settimana.inizio }} al {{ settimana.fine }}</h3>
-        
+
         {% for giorno in settimana.giorni %}
           <div class="giorno-riepilogo">
             <strong>{{ giorno.data }}</strong>
-            
+
             <div>
               <b>M:</b>
               {% if giorno.M %}
@@ -37,9 +37,9 @@
                   {{ utente }}
                   {% if utente == username %}
                     <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
-                      <input type="hidden" name="data" value="{{ giorno.data.split(' ')[1] }}/{{ settimana.inizio.split('/')[1] }}/20{{ settimana.inizio.split('/')[2] }}">
+                      <input type="hidden" name="data" value="{{ giorno.data_iso }}">
                       <input type="hidden" name="turno" value="M">
-                      <button type="submit" onclick="mostraToast()">✖</button>
+                      <button type="submit" class="btn-rimuovi" onclick="mostraToast()">✖</button>
                     </form>
                   {% endif %}
                 {% endfor %}
@@ -55,9 +55,9 @@
                   {{ utente }}
                   {% if utente == username %}
                     <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
-                      <input type="hidden" name="data" value="{{ giorno.data.split(' ')[1] }}/{{ settimana.inizio.split('/')[1] }}/20{{ settimana.inizio.split('/')[2] }}">
+                      <input type="hidden" name="data" value="{{ giorno.data_iso }}">
                       <input type="hidden" name="turno" value="P">
-                      <button type="submit" onclick="mostraToast()">✖</button>
+                      <button type="submit" class="btn-rimuovi" onclick="mostraToast()">✖</button>
                     </form>
                   {% endif %}
                 {% endfor %}
@@ -71,7 +71,8 @@
     {% endfor %}
   </div>
 
-  <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
   <div id="toast" class="toast">Turno rimosso</div>
+
+  <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
