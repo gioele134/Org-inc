@@ -12,9 +12,15 @@
     <a href="{{ url_for('logout') }}">Logout</a>
   </header>
 
+  <div class="navigazione">
+    <button id="prevBtn">← Settimana precedente</button>
+    <span id="titoloSettimana"></span>
+    <button id="nextBtn">Settimana successiva →</button>
+  </div>
+
   <main class="riepilogo">
     {% for settimana in settimane %}
-      <section class="settimana">
+      <section class="settimana" data-settimana="{{ loop.index0 }}" style="{% if not loop.first %}display:none{% endif %}">
         <h3>Settimana {{ settimana.numero }} — dal {{ settimana.inizio }} al {{ settimana.fine }}</h3>
 
         {% for giorno in settimana.giorni %}
@@ -27,5 +33,7 @@
       </section>
     {% endfor %}
   </main>
+
+  <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
