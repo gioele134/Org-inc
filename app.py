@@ -113,27 +113,30 @@ def riepilogo():
             "giorni": []
         }
 
-        for offset in range(6):  # lun-sab
-            giorno = lunedi + timedelta(days=offset)
-            data_str = giorno.strftime("%Y-%m-%d")
-            giorno_label = giorno.strftime("%A").upper() + " " + giorno.strftime("%d")
-            m = []
-            p = []
+        giorni_it = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO"]
 
-            for utente, disponibilita_utente in dati.items():
-                if data_str in disponibilita_utente:
-                    if "M" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["M"]:
-                        m.append(utente)
-                    if "P" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["P"]:
-                        p.append(utente)
+for offset in range(6):  # lun-sab
+    giorno = lunedi + timedelta(days=offset)
+    data_str = giorno.strftime("%Y-%m-%d")
+    giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
 
-            settimana_data["giorni"].append({
-                "data": giorno_label,
-                "M": m if m else None,
-                "P": p if p else None
-            })
+    m = []
+    p = []
 
-        settimane.append(settimana_data)
+    for utente, disponibilita_utente in dati.items():
+        if data_str in disponibilita_utente:
+            if "M" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["M"]:
+                m.append(utente)
+            if "P" in disponibilita_utente[data_str] and utente in disponibilita_utente[data_str]["P"]:
+                p.append(utente)
+
+    settimana_data["giorni"].append({
+        "data": giorno_label,
+        "M": m if m else None,
+        "P": p if p else None
+    })
+
+settimane.append(settimana_data)
 
     return render_template("riepilogo.html", settimane=settimane)
 
