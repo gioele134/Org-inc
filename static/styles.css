@@ -312,3 +312,11 @@ header a:hover {
   font-size: 0.95rem;
   margin-bottom: 0.3rem;
 }
+
+.contatore {
+  margin: 0.5rem auto 1rem;
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: bold;
+  color: #0077cc;
+}
