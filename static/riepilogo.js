@@ -1,15 +1,7 @@
 let settimanaCorrente = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
-  const settimane = document.querySelectorAll(".settimana");
-  const titolo = document.getElementById("titoloSettimana");
-
-  function mostraSettimana(index) {
-    settimane.forEach((s, i) => {
-      s.style.display = i === index ? "block" : "none";
-    });
-    titolo.textContent = settimane[index].querySelector("h3").textContent;
-  }
+  mostraSettimana(settimanaCorrente);
 
   document.getElementById("prevSettimana").addEventListener("click", () => {
     if (settimanaCorrente > 0) {
@@ -19,17 +11,26 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   document.getElementById("nextSettimana").addEventListener("click", () => {
-    if (settimanaCorrente < settimane.length - 1) {
+    if (settimanaCorrente < 4) {
       settimanaCorrente++;
       mostraSettimana(settimanaCorrente);
     }
   });
-
-  mostraSettimana(settimanaCorrente);
 });
 
-function mostraToast() {
+function mostraSettimana(index) {
+  const tutte = document.querySelectorAll(".settimana");
+  tutte.forEach((s, i) => {
+    s.style.display = (i === index) ? "block" : "none";
+  });
+
+  const titolo = tutte[index]?.querySelector("h3")?.textContent || "";
+  document.getElementById("titoloSettimana").textContent = titolo;
+}
+
+function mostraToast(msg) {
   const toast = document.getElementById("toast");
+  toast.textContent = msg;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2000);
 }
