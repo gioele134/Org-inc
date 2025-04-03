@@ -7,31 +7,32 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+
   <header>
     <h2>Calendario Disponibilità</h2>
-    <p>Benvenuto, {{ username }}</p>
-    <a href="{{ url_for('logout') }}">Logout</a>
-    <a href="{{ url_for('riepilogo') }}">Riepilogo</a>
+    <nav>
+      <a href="{{ url_for('riepilogo') }}">Vai al riepilogo</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
   </header>
 
-  <div class="container">
-    <div class="navigazione">
-      <button id="prevBtn">← Settimana precedente</button>
-      <span id="titoloSettimana"></span>
-      <button id="nextBtn">Settimana successiva →</button>
-      <div class="contatore">
-        Turni selezionati: <span id="contatoreSelezioni">0</span>
-      </div>
-    </div>
-
-    <div class="settimana" id="griglia"></div>
-
-    <div class="invia">
-      <button id="inviaBtn">Invia</button>
+  <div class="navigazione">
+    <button id="prevBtn">← Settimana precedente</button>
+    <span id="titoloSettimana"></span>
+    <button id="nextBtn">Settimana successiva →</button>
+    <div class="contatore">
+      Date selezionate: <span id="contatoreSelezioni">0</span>
     </div>
   </div>
 
-  <div id="toast" class="toast"></div>
+  <div class="settimana" id="griglia"></div>
+
+  <div class="invia">
+    <button id="inviaBtn">Invia</button>
+  </div>
+
+  <div id="toast" class="toast">Disponibilità aggiornata</div>
+
   <script src="{{ url_for('static', filename='calendar.js') }}"></script>
 </body>
 </html>
