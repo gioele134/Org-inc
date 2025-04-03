@@ -31,6 +31,7 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+# --- Credenziali ---
 UTENTI = {
     "gioele": "1234",
     "admin": "adminpass"
@@ -119,8 +120,7 @@ def aggiorna_disponibilita_turni():
     conn.close()
     return "", 204
 
-# --- Riepilogo ---
-
+# --- Riepilogo settimanale ---
 @app.route("/riepilogo")
 def riepilogo():
     if "username" not in session:
@@ -147,17 +147,18 @@ def riepilogo():
 
         for offset in range(6):
             giorno = lunedi + timedelta(days=offset)
-            data_str = giorno.strftime("%Y-%m-%d")
+            data_iso = giorno.strftime("%Y-%m-%d")
             giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
 
             # Recupera gli utenti che hanno dato disponibilità
-            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_str,))
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_iso,))
             m = [r["utente"] for r in cur.fetchall()]
-            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_str,))
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_iso,))
             p = [r["utente"] for r in cur.fetchall()]
 
             settimana_data["giorni"].append({
                 "data": giorno_label,
+                "data_iso": data_iso,
                 "M": m if m else None,
                 "P": p if p else None
             })
