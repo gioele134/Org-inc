@@ -119,7 +119,8 @@ def aggiorna_disponibilita_turni():
     conn.close()
     return "", 204
 
-# --- Riepilogo settimanale ---
+# --- Riepilogo ---
+
 @app.route("/riepilogo")
 def riepilogo():
     if "username" not in session:
@@ -164,7 +165,7 @@ def riepilogo():
         settimane.append(settimana_data)
 
     conn.close()
-    return render_template("riepilogo.html", settimane=settimane)
+    return render_template("riepilogo.html", settimane=settimane, username=session["username"])
 
 # --- Rimuovi disponibilità ---
 @app.route("/rimuovi_disponibilita", methods=["POST"])
