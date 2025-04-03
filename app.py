@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from datetime import datetime, timedelta
 from supabase import create_client
 import os
+import requests
 
 # --- Supabase setup ---
 SUPABASE_URL = "https://obeqzopopwfvkugojggs.supabase.co"
@@ -115,10 +116,9 @@ def rimuovi_disponibilita():
     return redirect(url_for("riepilogo"))
 
 # --- Riepilogo ---
-import requests
 
 SUPABASE_URL = "https://obeqzopopwfvkugojggs.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."  # (usa il tuo valore intero qui)
+SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZXF6b3BvcHdmdmt1Z29qZ2dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDY1NzcsImV4cCI6MjA1OTI4MjU3N30._dc4v6kraW1XXpfVsFej1mfnrWF0nQ5NzBFMfxaxQt0"
 
 @app.route("/riepilogo")
 def riepilogo():
