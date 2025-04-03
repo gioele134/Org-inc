@@ -2,34 +2,39 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Riepilogo disponibilità</title>
+  <title>Riepilogo Disponibilità</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+
   <header>
     <h2>Riepilogo Disponibilità</h2>
+    <p>Benvenuto, {{ username }}</p>
     <nav>
-      <a class="link-calendario" href="{{ url_for('calendario') }}">← Torna al calendario</a>
+      <a href="{{ url_for('calendario') }}">← Torna al calendario</a>
       <a href="{{ url_for('logout') }}">Logout</a>
     </nav>
   </header>
 
-  <div class="navigazione">
-    <button id="prevSettimana">← Settimana precedente</button>
-    <span id="titoloSettimana"></span>
-    <button id="nextSettimana">Settimana successiva →</button>
+  <!-- Barra fissa di navigazione settimana -->
+  <div class="barra-fissa">
+    <div class="navigazione">
+      <button id="prevSettimana" onclick="modificaSettimana(-1)">← Settimana precedente</button>
+      <span id="titoloSettimana">{{ settimana.inizio }} - {{ settimana.fine }}</span>
+      <button id="nextSettimana" onclick="modificaSettimana(1)">Settimana successiva →</button>
+    </div>
   </div>
 
   <div id="settimaneContainer" class="riepilogo">
     {% for settimana in settimane %}
-      <div class="settimana" data-index="{{ loop.index0 }}" style="{% if not loop.first %}display: none;{% endif %}">
+      <div class="settimana" data-index="{{ loop.index0 }}">
         <h3>Settimana {{ settimana.numero }} — dal {{ settimana.inizio }} al {{ settimana.fine }}</h3>
-        
+
         {% for giorno in settimana.giorni %}
           <div class="giorno-riepilogo">
             <strong>{{ giorno.data }}</strong>
-
+            
             <div>
               <b>M:</b>
               {% if giorno.M %}
@@ -37,9 +42,9 @@
                   {{ utente }}
                   {% if utente == username %}
                     <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
-                      <input type="hidden" name="data" value="{{ giorno.iso }}">
+                      <input type="hidden" name="data" value="{{ giorno.data.split(' ')[1] }}/{{ settimana.inizio.split('/')[1] }}/20{{ settimana.inizio.split('/')[2] }}">
                       <input type="hidden" name="turno" value="M">
-                      <button type="submit" class="rimuovi-btn">✖</button>
+                      <button type="submit" class="rimuovi-btn" onclick="mostraToast()">✖</button>
                     </form>
                   {% endif %}
                 {% endfor %}
@@ -55,9 +60,9 @@
                   {{ utente }}
                   {% if utente == username %}
                     <form method="POST" action="{{ url_for('rimuovi_disponibilita') }}" style="display:inline;">
-                      <input type="hidden" name="data" value="{{ giorno.iso }}">
+                      <input type="hidden" name="data" value="{{ giorno.data.split(' ')[1] }}/{{ settimana.inizio.split('/')[1] }}/20{{ settimana.inizio.split('/')[2] }}">
                       <input type="hidden" name="turno" value="P">
-                      <button type="submit" class="rimuovi-btn">✖</button>
+                      <button type="submit" class="rimuovi-btn" onclick="mostraToast()">✖</button>
                     </form>
                   {% endif %}
                 {% endfor %}
@@ -72,6 +77,7 @@
   </div>
 
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
-  <div id="toast" class="toast">Turno rimosso</div>
+  <div id="toast" class="toast">Disponibilità aggiornata</div>
+
 </body>
 </html>
