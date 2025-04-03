@@ -27,3 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   mostraSettimana(settimanaCorrente);
 });
+
+function mostraToast() {
+  const toast = document.getElementById("toast");
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2000);
+}
