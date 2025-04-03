@@ -240,3 +240,133 @@ header nav a:hover {
 .rimuovi-btn:hover {
   background-color: rgba(200, 35, 50, 1);
 }
+
+/* Login */
+.login-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px;
+  background: white;
+  border: 1px solid #ddd;
+  max-width: 420px;
+  margin: 2rem auto;
+  padding: 1rem;
+  box-sizing: border-box;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.login-container h2 {
+  grid-column: span 2;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #0077cc;
+}
+
+.login-form {
+  grid-column: span 2;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.login-form input {
+  padding: 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.login-form button {
+  padding: 0.8rem;
+  font-size: 1rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.login-form button:hover {
+  background-color: #005fa3;
+}
+
+.errore {
+  grid-column: span 2;
+  background: #cc0000;
+  color: white;
+  padding: 0.5rem;
+  text-align: center;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+/* Riepilogo */
+.riepilogo {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: sans-serif;
+}
+
+.settimana {
+  margin-bottom: 2.5rem;
+  background-color: #f9f9f9;
+  padding: 1rem;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.settimana h3 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #333;
+}
+
+.giorno-riepilogo {
+  padding: 0.6rem;
+  border-top: 1px solid #ddd;
+}
+
+.giorno-riepilogo strong {
+  display: block;
+  font-size: 1rem;
+  margin-bottom: 0.3rem;
+  color: #0077cc;
+}
+
+.giorno-riepilogo div {
+  font-size: 0.95rem;
+  margin-bottom: 0.3rem;
+}
+
+.contatore {
+  margin: 0.5rem auto 1rem;
+  font-size: 1.1rem;
+  text-align: center;
+  font-weight: bold;
+  color: #0077cc;
+}
+
+.rimuovi-btn {
+  background-color: rgba(220, 53, 69, 0.8); /* rosso trasparente */
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 1.6rem;
+  height: 1.6rem;
+  font-size: 0.95rem;
+  font-weight: bold;
+  line-height: 1.6rem;
+  text-align: center;
+  vertical-align: middle;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.rimuovi-btn:hover {
+  background-color: rgba(200, 35, 50, 1);
+}
