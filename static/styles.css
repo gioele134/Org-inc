@@ -1,80 +1,4 @@
-/* Responsive mobile: max 480px */
-@media (max-width: 480px) {
-  body {
-    font-size: 16px;
-  }
-
-  header h2 {
-    font-size: 1rem;
-  }
-
-  header nav {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.5rem;
-  }
-
-  .navigazione {
-    flex-direction: column;
-    gap: 0.6rem;
-  }
-
-  .navigazione button {
-    width: 100%;
-    font-size: 1rem;
-  }
-
-  #titoloSettimana {
-    font-size: 1rem;
-  }
-
-  .contatore {
-    font-size: 1rem;
-    color: #0077cc;
-    margin-bottom: 0.5rem;
-  }
-
-  .invia-contesto {
-    width: 100%;
-  }
-
-  #inviaBtn {
-    width: 100%;
-    font-size: 1.1rem;
-    padding: 0.8rem;
-  }
-
-  .giorno {
-    font-size: 0.9rem;
-    padding: 0.4rem;
-  }
-
-  .turno-btn {
-    font-size: 1.1rem;
-    padding: 0.6rem;
-  }
-
-  .domenica {
-    font-size: 0.9rem;
-  }
-
-  .riepilogo {
-    padding: 0 0.5rem;
-  }
-
-  .settimana {
-    padding: 0.8rem;
-  }
-
-  .giorno-riepilogo strong {
-    font-size: 1rem;
-  }
-
-  .giorno-riepilogo div {
-    font-size: 0.95rem;
-  }
-}
-
+/* === BASE === */
 body {
   margin: 0;
   font-family: sans-serif;
@@ -83,8 +7,9 @@ body {
   padding-bottom: 100px;
 }
 
+/* === HEADER === */
 header {
-  position: sticky;
+  position: fixed;
   top: 0;
   left: 0;
   right: 0;
@@ -92,13 +17,17 @@ header {
   padding: 1rem;
   z-index: 9999;
   border-bottom: 1px solid #ccc;
-  overflow-x: auto;
-  white-space: nowrap;
+  text-align: center;
 }
 
 header h2 {
   margin: 0;
   font-size: 1.2rem;
+}
+
+header p {
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
 }
 
 header nav {
@@ -107,8 +36,6 @@ header nav {
   align-items: center;
   margin-top: 0.5rem;
   gap: 1rem;
-  flex-wrap: nowrap;
-  overflow-x: auto;
 }
 
 header a {
@@ -122,20 +49,27 @@ header a:hover {
   text-decoration: underline;
 }
 
+/* === CONTENITORE === */
 .container {
   max-width: 420px;
   margin: 0 auto;
   padding: 1rem;
+  padding-top: 6rem;
 }
 
+/* === NAVIGAZIONE === */
 .navigazione {
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-bottom: 1rem;
+}
+
+.settimana-btns {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 0.8rem;
-  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .navigazione button {
@@ -156,36 +90,54 @@ header a:hover {
 #titoloSettimana {
   font-weight: bold;
   font-size: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .contatore {
-  margin-top: 0.6rem;
   font-size: 1.1rem;
   font-weight: bold;
-}
-
-#contatoreSelezioni {
   color: #0077cc;
+  margin-bottom: 0.8rem;
+  text-align: center;
 }
 
-/* Griglia settimana */
+.invia-contesto {
+  text-align: center;
+}
+
+#inviaBtn {
+  background: #28a745;
+  color: white;
+  border: none;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#inviaBtn:hover {
+  background-color: #218838;
+}
+
+/* === GRIGLIA CALENDARIO === */
 .settimana {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2px;
 }
 
-/* Giorni lun-sab con turni */
 .giorno {
-  position: relative;
   background: white;
   border: 1px solid #ddd;
-  font-size: 0.8rem;
   padding: 0.4rem;
+  font-size: 0.8rem;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   aspect-ratio: 1 / 1;
+  position: relative;
 }
 
 .etichetta {
@@ -222,7 +174,7 @@ header a:hover {
   margin-top: 2px;
 }
 
-/* Domenica */
+/* === DOMENICA === */
 .domenica {
   grid-column: span 2;
   height: 50px;
@@ -237,29 +189,7 @@ header a:hover {
   pointer-events: none;
 }
 
-/* Invia */
-.invia-contesto {
-  margin-top: 0.8rem;
-  text-align: center;
-}
-
-#inviaBtn {
-  background: #28a745;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.2rem;
-  border-radius: 6px;
-  font-size: 1rem;
-  cursor: pointer;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-#inviaBtn:hover {
-  background-color: #218838;
-}
-
-/* Toast */
+/* === TOAST === */
 .toast {
   visibility: hidden;
   position: fixed;
@@ -280,7 +210,7 @@ header a:hover {
   opacity: 1;
 }
 
-/* Login */
+/* === LOGIN === */
 .login-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -290,7 +220,6 @@ header a:hover {
   max-width: 420px;
   margin: 2rem auto;
   padding: 1rem;
-  box-sizing: border-box;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
@@ -315,7 +244,6 @@ header a:hover {
   border: 1px solid #ccc;
   border-radius: 6px;
   width: 100%;
-  box-sizing: border-box;
 }
 
 .login-form button {
@@ -342,75 +270,61 @@ header a:hover {
   margin-bottom: 0.5rem;
 }
 
-/* Festivi */
-.festivo {
-  background-color: rgba(255, 0, 0, 0.2);
-  pointer-events: none;
-  opacity: 0.7;
-}
-
-.festivo-label {
-  font-size: 0.9rem;
-  color: #a00;
-  font-weight: bold;
-  text-align: center;
-}
-
-/* Riepilogo */
-.riepilogo {
-  max-width: 600px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  font-family: sans-serif;
-}
-
-.settimana {
-  margin-bottom: 2.5rem;
-  background-color: #f9f9f9;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.05);
-}
-
-.settimana h3 {
-  font-size: 1.1rem;
-  margin-bottom: 1rem;
-  text-align: center;
-  color: #333;
-}
-
-.giorno-riepilogo {
-  padding: 0.6rem;
-  border-top: 1px solid #ddd;
-}
-
-.giorno-riepilogo strong {
-  display: block;
-  font-size: 1rem;
-  margin-bottom: 0.3rem;
-  color: #0077cc;
-}
-
-.giorno-riepilogo div {
-  font-size: 0.95rem;
-  margin-bottom: 0.3rem;
-}
-
-.contatore {
-  margin: 0.5rem auto 1rem;
-  font-size: 1.1rem;
-  text-align: center;
-  font-weight: bold;
-  color: #0077cc;
-}
-
+/* === RIMOZIONE DISPONIBILITÀ (✖) === */
 .rimuovi-btn {
   background-color: rgba(255, 0, 0, 0.8);
   color: white;
   border: none;
-  border-radius: 4px;
-  padding: 0.1rem 0.4rem;
   font-size: 1rem;
+  margin-left: 0.3rem;
+  padding: 2px 6px;
+  border-radius: 4px;
   cursor: pointer;
-  margin-left: 6px;
+}
+
+/* === MEDIA QUERY: MIGLIORAMENTO SU TABLET E DESKTOP === */
+@media (min-width: 768px) {
+  .container {
+    max-width: 600px;
+    padding: 2rem;
+  }
+
+  .giorno {
+    font-size: 1rem;
+  }
+
+  .turno-btn {
+    font-size: 1.3rem;
+    padding: 1rem;
+  }
+
+  .settimana {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .conteggio {
+    font-size: 0.95rem;
+  }
+
+  #inviaBtn {
+    font-size: 1.1rem;
+    padding: 0.6rem 1.6rem;
+  }
+
+  .navigazione button {
+    font-size: 1rem;
+    padding: 0.6rem 1.2rem;
+  }
+
+  header h2 {
+    font-size: 1.4rem;
+  }
+
+  .login-container {
+    max-width: 500px;
+  }
+
+  .toast {
+    font-size: 1rem;
+  }
 }
