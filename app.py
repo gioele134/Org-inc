@@ -120,12 +120,14 @@ def riepilogo():
     if "username" not in session:
         return redirect(url_for("login"))
 
-    username = session["username"]
+    conn = get_db_connection()
+    cur = conn.cursor()
+
     oggi = datetime.today()
     lunedi_corrente = oggi - timedelta(days=oggi.weekday())
     settimane = []
 
-    for i in range(1, 6):  # dalla settimana prossima a +5
+    for i in range(1, 6):  # da settimana prossima a +5
         lunedi = lunedi_corrente + timedelta(weeks=i)
         domenica = lunedi + timedelta(days=6)
         settimana_data = {
@@ -137,30 +139,28 @@ def riepilogo():
 
         giorni_it = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO"]
 
-        for offset in range(6):
+        for offset in range(6):  # lun-sab
             giorno = lunedi + timedelta(days=offset)
-            data_str = giorno.strftime("%Y-%m-%d")
-            giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
+            data_str = giorno.strftime("%Y-%m-%d")  # ISO 8601
+            giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"  # Es: "LUNEDÌ 08"
 
-            # Query M
-            m = supabase.table("disponibilita").select("utente")\
-                .eq("data", data_str).eq("turno", "M").execute()
-            utenti_m = [r["utente"] for r in m.data]
-
-            # Query P
-            p = supabase.table("disponibilita").select("utente")\
-                .eq("data", data_str).eq("turno", "P").execute()
-            utenti_p = [r["utente"] for r in p.data]
+            # Recupera utenti per M e P
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='M'", (data_str,))
+            m = [r["utente"] for r in cur.fetchall()]
+            cur.execute("SELECT utente FROM disponibilita WHERE data=? AND turno='P'", (data_str,))
+            p = [r["utente"] for r in cur.fetchall()]
 
             settimana_data["giorni"].append({
-                "data": giorno_label,
-                "M": utenti_m if utenti_m else None,
-                "P": utenti_p if utenti_p else None
+                "label": giorno_label,   # Per visualizzazione
+                "iso": data_str,         # Per uso interno nei form
+                "M": m if m else None,
+                "P": p if p else None
             })
 
         settimane.append(settimana_data)
 
-    return render_template("riepilogo.html", settimane=settimane, username=username)
+    conn.close()
+    return render_template("riepilogo.html", settimane=settimane, username=session["username"])
 
 # --- Avvio ---
 if __name__ == "__main__":
