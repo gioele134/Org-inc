@@ -1,34 +1,29 @@
+let settimanaCorrente = 0;
+
 document.addEventListener("DOMContentLoaded", () => {
   const settimane = document.querySelectorAll(".settimana");
   const titolo = document.getElementById("titoloSettimana");
-  let indice = 0;
 
-  function aggiornaSettimana() {
+  function mostraSettimana(index) {
     settimane.forEach((s, i) => {
-      s.style.display = i === indice ? "block" : "none";
-      if (i === indice) {
-        const h3 = s.querySelector("h3");
-        titolo.textContent = h3 ? h3.textContent : "";
-      }
+      s.style.display = i === index ? "block" : "none";
     });
-
-    document.getElementById("prevBtn").disabled = indice === 0;
-    document.getElementById("nextBtn").disabled = indice === settimane.length - 1;
+    titolo.textContent = settimane[index].querySelector("h3").textContent;
   }
 
-  document.getElementById("prevBtn").addEventListener("click", () => {
-    if (indice > 0) {
-      indice--;
-      aggiornaSettimana();
+  document.getElementById("prevSettimana").addEventListener("click", () => {
+    if (settimanaCorrente > 0) {
+      settimanaCorrente--;
+      mostraSettimana(settimanaCorrente);
     }
   });
 
-  document.getElementById("nextBtn").addEventListener("click", () => {
-    if (indice < settimane.length - 1) {
-      indice++;
-      aggiornaSettimana();
+  document.getElementById("nextSettimana").addEventListener("click", () => {
+    if (settimanaCorrente < settimane.length - 1) {
+      settimanaCorrente++;
+      mostraSettimana(settimanaCorrente);
     }
   });
 
-  aggiornaSettimana();
+  mostraSettimana(settimanaCorrente);
 });
