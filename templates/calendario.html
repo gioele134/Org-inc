@@ -17,21 +17,25 @@
     </nav>
   </header>
 
-  <div class="navigazione">
-    <button id="prevBtn">← Settimana precedente</button>
-    <span id="titoloSettimana"></span>
-    <button id="nextBtn">Settimana successiva →</button>
+  <div class="container">
+    <div class="navigazione">
+      <div class="settimana-btns">
+        <button id="prevBtn">← Settimana precedente</button>
+        <button id="nextBtn">Settimana successiva →</button>
+      </div>
+      <span id="titoloSettimana"></span>
 
-    <div class="contatore" id="contenitoreContatore">
-      Stai inviando <span id="contatoreSelezioni">0</span> disponibilità
+      <div class="contatore" id="contenitoreContatore">
+        Stai inviando <span id="contatoreSelezioni">0</span> disponibilità
+      </div>
+
+      <div class="invia-contesto">
+        <button id="inviaBtn">Invia</button>
+      </div>
     </div>
 
-    <div class="invia-contesto">
-      <button id="inviaBtn">Invia</button>
-    </div>
+    <div class="settimana" id="griglia"></div>
   </div>
-
-  <div class="settimana" id="griglia"></div>
 
   <div id="toast" class="toast">Disponibilità aggiornata</div>
 
