@@ -1,8 +1,8 @@
 const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
 let settimanaCorrente = 0;
-let selezionate = {};  // { "2024-04-10": "M" }
+let selezionate = {};  // { "2025-04-10": "M" }
 let confermate = {};
-let mappaDisponibilita = {}; // { "2024-04-10": { M: 2, P: 1 } }
+let mappaDisponibilita = {}; // { "2025-04-10": { M: 2, P: 1 } }
 let giorniFestivi = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -45,8 +45,7 @@ function aggiornaSettimana() {
 
   const domenica = new Date(lunedi);
   domenica.setDate(domenica.getDate() + 6);
-  const range = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
-  document.getElementById("titoloSettimana").textContent = range;
+  document.getElementById("titoloSettimana").textContent = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
 
   for (let i = 0; i < 6; i++) {
     const giorno = new Date(lunedi);
@@ -160,7 +159,6 @@ async function caricaFestivi() {
     const json = await res.json();
     giorniFestivi = json.map(f => f.date);
   } catch (e) {
-    console.warn("Festivi non disponibili. Continuo senza.");
     giorniFestivi = [];
   }
 }
