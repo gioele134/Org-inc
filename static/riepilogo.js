@@ -1,109 +1,70 @@
-// Aggiungi il tuo URL di Supabase e la chiave API
-const supabaseUrl = 'https://obeqzopopwfvkugojggs.supabase.co';  // Sostituisci con il tuo URL
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZXF6b3BvcHdmdmt1Z29qZ2dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDY1NzcsImV4cCI6MjA1OTI4MjU3N30._dc4v6kraW1XXpfVsFej1mfnrWF0nQ5NzBFMfxaxQt0';  // Sostituisci con la tua chiave API pubblica
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-// Variabili globali per gestire la settimana
-let settimanaCorrente = 0;
+const settimanaCorrenteIniziale = 0;
+let settimanaCorrente = settimanaCorrenteIniziale;
 let settimane = [];
 
-// Quando il documento è pronto, carica i dati
+// Utility: calcola il numero della settimana ISO
+Date.prototype.getWeek = function () {
+  const date = new Date(this.getTime());
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
+};
+
 document.addEventListener("DOMContentLoaded", async () => {
-    await ottieniDatiSettimane(); // Carica i dati dal backend Supabase
-    aggiornaSettimana(); // Mostra la settimana corrente
-    document.getElementById("prevSettimana").addEventListener("click", () => cambiaSettimana(-1));
-    document.getElementById("nextSettimana").addEventListener("click", () => cambiaSettimana(1));
+  await caricaSettimane();
+  aggiornaSettimana();
+  document.getElementById("prevSettimana").addEventListener("click", () => cambiaSettimana(-1));
+  document.getElementById("nextSettimana").addEventListener("click", () => cambiaSettimana(1));
 });
 
-// Funzione per ottenere i dati delle settimane da Supabase
-async function ottieniDatiSettimane() {
-    // Effettua una chiamata a Supabase per ottenere i dati
-    const { data, error } = await supabase
-        .from("disponibilita") // Nome della tua tabella in Supabase
-        .select("*")
-        .order("data", { ascending: true });
-
-    if (error) {
-        console.error("Errore nel recupero dei dati:", error);
-        return;
-    }
-
-    // Processa i dati per ottenere la settimana
-    settimane = processaDatiSettimane(data);
+async function caricaSettimane() {
+  const res = await fetch("/riepilogo_dati.json");
+  const dati = await res.json();
+  settimane = dati.settimane || [];
 }
 
-// Funzione per organizzare i dati in settimane
-function processaDatiSettimane(data) {
-    const settimaneTemp = [];
-
-    // Elabora i dati, organizzandoli in settimane
-    data.forEach(item => {
-        const dataArr = item.data.split('-');  // Usa il formato della data YYYY-MM-DD
-        const settimanaNum = new Date(item.data).getWeek();
-
-        // Aggiungi la disponibilità alla settimana corretta
-        const settimana = settimaneTemp[settimanaNum] || { giorni: {} };
-        settimana.giorni[dataArr[2]] = settimana.giorni[dataArr[2]] || [];
-        settimana.giorni[dataArr[2]].push(item.turno);
-        settimaneTemp[settimanaNum] = settimana;
-    });
-
-    return settimaneTemp;
+function cambiaSettimana(delta) {
+  const nuova = settimanaCorrente + delta;
+  if (nuova >= 0 && nuova < settimane.length) {
+    settimanaCorrente = nuova;
+    aggiornaSettimana();
+  }
 }
 
-// Funzione per cambiare settimana
-function cambiaSettimana(differenza) {
-    const nuova = settimanaCorrente + differenza;
-    if (nuova >= 0 && nuova < settimane.length) {
-        settimanaCorrente = nuova;
-        aggiornaSettimana();
-    }
-}
-
-// Funzione per aggiornare la visualizzazione della settimana
 function aggiornaSettimana() {
-    const griglia = document.getElementById("settimaneContainer");
-    griglia.innerHTML = "";
+  const contenitore = document.getElementById("settimaneContainer");
+  contenitore.innerHTML = "";
 
-    const settimana = settimane[settimanaCorrente];
-    const titoloSettimana = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
-    document.getElementById("titoloSettimana").textContent = titoloSettimana;
+  const settimana = settimane[settimanaCorrente];
+  if (!settimana) return;
 
-    settimana.giorni.forEach(giorno => {
-        const giornoDiv = document.createElement("div");
-        giornoDiv.classList.add("giorno-riepilogo");
+  document.getElementById("titoloSettimana").textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
 
-        const data = giorno.data;
-        giornoDiv.innerHTML = `
-            <strong>${data}</strong>
-            <div><b>M:</b> ${giorno.M || "nessuno"}</div>
-            <div><b>P:</b> ${giorno.P || "nessuno"}</div>
-        `;
-        griglia.appendChild(giornoDiv);
-    });
+  settimana.giorni.forEach(giorno => {
+    const giornoDiv = document.createElement("div");
+    giornoDiv.classList.add("giorno-riepilogo");
+
+    giornoDiv.innerHTML = `
+      <strong>${giorno.data}</strong>
+      <div><b>M:</b> ${renderTurno(giorno.M, giorno.data_iso, "M")}</div>
+      <div><b>P:</b> ${renderTurno(giorno.P, giorno.data_iso, "P")}</div>
+    `;
+
+    contenitore.appendChild(giornoDiv);
+  });
 }
 
-// Gestione delle modifiche (clic per rimuovere disponibilità)
-async function rimuoviDisponibilita(data, turno) {
-    const { error } = await supabase
-        .from('disponibilita')
-        .delete()
-        .eq('data', data)
-        .eq('turno', turno);
+function renderTurno(lista, data, turno) {
+  if (!lista || lista.length === 0) return "nessuno";
 
-    if (error) {
-        console.error('Errore nella rimozione della disponibilità:', error);
-    } else {
-        console.log('Disponibilità rimossa correttamente:', data, turno);
-        aggiornaSettimana(); // Ricarica la settimana
-    }
+  return lista.map(utente => {
+    const isCurrentUser = utente === window.username; // puoi settarlo nel template se serve
+    return isCurrentUser
+      ? `${utente} <form method="POST" action="/rimuovi_disponibilita" style="display:inline;">
+          <input type="hidden" name="data" value="${data}">
+          <input type="hidden" name="turno" value="${turno}">
+          <button type="submit" class="rimuovi-btn" title="Rimuovi disponibilità">✖</button>
+         </form>`
+      : utente;
+  }).join(" ");
 }
-
-// Gestione del click sulla X per rimuovere una disponibilità
-document.addEventListener('click', function(event) {
-    if (event.target.classList.contains('rimuovi-btn')) {
-        const data = event.target.dataset.data;
-        const turno = event.target.dataset.turno;
-        rimuoviDisponibilita(data, turno);
-    }
-});
