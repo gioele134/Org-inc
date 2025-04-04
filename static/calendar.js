@@ -60,12 +60,10 @@ function aggiornaSettimana() {
 
     const div = document.createElement("div");
     div.classList.add("giorno");
-    if (èFestivo) div.classList.add("festivo");
 
     const etichetta = document.createElement("div");
     etichetta.classList.add("etichetta");
     etichetta.textContent = label;
-
     div.appendChild(etichetta);
 
     if (èFestivo) {
@@ -81,32 +79,36 @@ function aggiornaSettimana() {
     const turniDiv = document.createElement("div");
     turniDiv.classList.add("turni");
 
-    ["M", "P"].forEach(turno => {
-      const btn = document.createElement("button");
-      btn.classList.add("turno-btn");
-      btn.textContent = turno;
+    const turnoConfermato = confermate[dataISO];
+    if (turnoConfermato) {
+      const conferma = document.createElement("div");
+      conferma.classList.add("turno-confermato");
+      conferma.textContent = `${turnoConfermato} ✔`;
+      conferma.style.color = "green";
+      conferma.style.fontWeight = "bold";
+      turniDiv.appendChild(conferma);
+    } else if (!èFestivo) {
+      ["M", "P"].forEach(turno => {
+        const btn = document.createElement("button");
+        btn.classList.add("turno-btn");
+        btn.textContent = turno;
 
-      if (confermate[dataISO] === turno) {
-        btn.classList.add("selezionato");
-        btn.disabled = true;
-      }
-
-      if (selezionate[dataISO] === turno) {
-        btn.classList.add("selezionato");
-      }
-
-      btn.addEventListener("click", () => {
-        if (btn.disabled || èFestivo) return;
         if (selezionate[dataISO] === turno) {
-          delete selezionate[dataISO];
-        } else {
-          selezionate[dataISO] = turno;
+          btn.classList.add("selezionato");
         }
-        aggiornaSettimana();
-      });
 
-      turniDiv.appendChild(btn);
-    });
+        btn.addEventListener("click", () => {
+          if (selezionate[dataISO] === turno) {
+            delete selezionate[dataISO];
+          } else {
+            selezionate[dataISO] = turno;
+          }
+          aggiornaSettimana();
+        });
+
+        turniDiv.appendChild(btn);
+      });
+    }
 
     const conteggio = document.createElement("div");
     conteggio.classList.add("conteggio");
