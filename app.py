@@ -159,7 +159,13 @@ def riepilogo():
 
         settimane.append(settimana_data)
 
-    return render_template("riepilogo.html", settimane=settimane, username=session["username"])
+    return render_template(
+    "riepilogo.html",
+    settimane=settimane,
+    username=session["username"],
+    supabase_url=os.environ["SUPABASE_URL"],
+    supabase_key=os.environ["SUPABASE_KEY"]
+)
 
 # --- Avvio app ---
 if __name__ == "__main__":
