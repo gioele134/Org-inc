@@ -28,6 +28,11 @@
   <div id="settimaneContainer" class="riepilogo"></div>
 
   <div id="toast" class="toast">Disponibilità aggiornata</div>
+  <script>
+  window.SUPABASE_URL = "{{ supabase_url }}";
+  window.SUPABASE_KEY = "{{ supabase_key }}";
+  window.username = "{{ username }}";
+</script>
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
