@@ -35,7 +35,11 @@ function aggiornaSettimana() {
   aggiornaContatore();
 
   const oggi = new Date();
-  const lunediCorrente = new Date(oggi.setDate(oggi.getDate() - oggi.getDay() + 1));
+  const giornoSettimana = oggi.getDay();
+  const diff = giornoSettimana === 0 ? -6 : 1 - giornoSettimana;
+  const lunediCorrente = new Date(oggi);
+  lunediCorrente.setDate(oggi.getDate() + diff);
+
   const lunedi = new Date(lunediCorrente);
   lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1));
 
@@ -151,7 +155,12 @@ function formattaDataBreve(data) {
 }
 
 async function caricaFestivi() {
-  const res = await fetch("https://date.nager.at/api/v3/PublicHolidays/2024/IT");
-  const json = await res.json();
-  giorniFestivi = json.map(f => f.date);
+  try {
+    const res = await fetch("https://date.nager.at/api/v3/PublicHolidays/2024/IT");
+    const json = await res.json();
+    giorniFestivi = json.map(f => f.date);
+  } catch (e) {
+    console.warn("Festivi non disponibili. Continuo senza.");
+    giorniFestivi = [];
+  }
 }
