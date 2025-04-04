@@ -11,7 +11,7 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Flask setup ---
 app = Flask(__name__)
-app.secret_key = os.environ("FLASK_SECRET")
+app.secret_key = os.environ["FLASK_SECRET"]
 # --- Utenti autorizzati ---
 UTENTI = {
     "gioele": "1234",
