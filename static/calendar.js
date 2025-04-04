@@ -97,13 +97,18 @@ function aggiornaSettimana() {
           btn.classList.add("selezionato");
         }
 
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", (e) => {
+          // Rimuove selezione visiva da entrambi
+          const btns = e.target.parentElement.querySelectorAll(".turno-btn");
+          btns.forEach(b => b.classList.remove("selezionato"));
+
           if (selezionate[dataISO] === turno) {
             delete selezionate[dataISO];
           } else {
             selezionate[dataISO] = turno;
+            e.target.classList.add("selezionato");
           }
-          aggiornaSettimana();
+          aggiornaContatore();  // aggiorna il contatore senza ridisegnare tutto
         });
 
         turniDiv.appendChild(btn);
@@ -126,8 +131,6 @@ function aggiornaSettimana() {
   divDom.classList.add("domenica");
   divDom.textContent = domLabel;
   griglia.appendChild(divDom);
-
-  aggiornaContatore();
 }
 
 function aggiornaContatore() {
