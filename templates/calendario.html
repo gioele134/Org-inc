@@ -17,24 +17,26 @@
     </nav>
   </header>
 
-  <div class="settimana" id="griglia"></div>
+  <main>
+    <div class="settimana" id="griglia"></div>
+  </main>
 
-  <!-- Barra fissa in basso -->
-  <div class="barra-fissa">
-    <div class="navigazione">
-      <button id="prevBtn">←</button>
-      <span id="titoloSettimana"></span>
-      <button id="nextBtn">→</button>
-    </div>
-    <div class="contatore" id="contenitoreContatore">
-      Stai inviando <span id="contatoreSelezioni">0</span> disponibilità
-    </div>
-    <div class="invia">
-      <button id="inviaBtn">Invia</button>
-    </div>
+  <!-- Barra di controllo fissa in basso -->
+  <div class="barra-controllo">
+    <button id="prevBtn">← Settimana precedente</button>
+    <button id="inviaBtn">Invia</button>
+    <button id="nextBtn">Settimana successiva →</button>
   </div>
 
+  <!-- Contatore selezioni -->
+  <div id="contenitoreContatore" style="text-align:center; margin-top: 0.5rem;">
+    Stai inviando <span id="contatoreSelezioni">0</span> disponibilità
+  </div>
+
+  <!-- Toast di conferma -->
   <div id="toast" class="toast">Disponibilità aggiornata</div>
+
+  <!-- Script -->
   <script src="{{ url_for('static', filename='calendar.js') }}"></script>
 </body>
 </html>
