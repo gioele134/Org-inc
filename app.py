@@ -4,15 +4,14 @@ from supabase import create_client
 import os
 
 # --- Supabase setup ---
-SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://obeqzopopwfvkugojggs.supabase.co")
-SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "INSERISCI_LA_TUA_CHIAVE_SEGRETA")
+SUPABASE_URL = os.environ("SUPABASE_URL")
+SUPABASE_KEY = os.environ("SUPABASE_KEY")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Flask setup ---
 app = Flask(__name__)
-app.secret_key = os.environ.get("FLASK_SECRET", "chiave-super-segreta")
-
+app.secret_key = os.environ("FLASK_SECRET")
 # --- Utenti autorizzati ---
 UTENTI = {
     "gioele": "1234",
