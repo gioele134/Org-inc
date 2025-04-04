@@ -1,0 +1,194 @@
+/* Reset base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: #f4f4f4;
+  color: #333;
+  min-height: 100vh;
+  padding-bottom: 70px; /* spazio per barra fissa */
+}
+
+/* Header */
+header {
+  background-color: #005f73;
+  color: white;
+  padding: 1rem;
+  text-align: center;
+}
+
+header h2 {
+  margin-bottom: 0.5rem;
+}
+
+nav a {
+  margin: 0 0.5rem;
+  color: #ffe;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav a:hover {
+  text-decoration: underline;
+}
+
+/* Login page */
+form.login-form {
+  max-width: 320px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #ccc;
+}
+
+form.login-form input,
+form.login-form button {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  font-size: 1rem;
+}
+
+form.login-form button {
+  background-color: #0a9396;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+form.login-form button:hover {
+  background-color: #007d82;
+}
+
+/* Calendario / Riepilogo */
+#griglia, .riepilogo {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+/* Giorni calendario */
+.giorno {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.8rem;
+}
+
+.giorno.festivo {
+  background-color: #ffe5e5;
+}
+
+.domenica {
+  background: #ffcccc;
+  padding: 0.8rem;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+/* Etichetta giorno */
+.etichetta {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Bottoni M/P */
+.turni {
+  margin-bottom: 0.5rem;
+}
+
+.turno-btn {
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #888;
+  background: #eee;
+  cursor: pointer;
+}
+
+.turno-btn:hover:not(:disabled) {
+  background-color: #ddd;
+}
+
+.turno-btn.selezionato {
+  background-color: #198754;
+  color: white;
+  font-weight: bold;
+}
+
+/* Conteggio */
+.conteggio {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Barra di controllo fissa in basso */
+.barra-controllo {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #ccc;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 0.7rem;
+  z-index: 1000;
+}
+
+.barra-controllo button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: #0a9396;
+  color: white;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.barra-controllo button:hover {
+  background-color: #007d82;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #198754;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2000;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .turni {
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .barra-controllo {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
