@@ -17,22 +17,25 @@
     </nav>
   </header>
 
-  <div class="barra-fissa">
-    <div class="navigazione">
-      <button id="prevSettimana">← Settimana precedente</button>
-      <span id="titoloSettimana"></span>
-      <button id="nextSettimana">Settimana successiva →</button>
-    </div>
+  <main>
+    <div id="settimaneContainer" class="riepilogo"></div>
+  </main>
+
+  <!-- Barra di controllo fissa in basso -->
+  <div class="barra-controllo">
+    <button id="prevSettimana">← Settimana precedente</button>
+    <button id="nextSettimana">Settimana successiva →</button>
   </div>
 
-  <div id="settimaneContainer" class="riepilogo"></div>
-
+  <!-- Toast di conferma -->
   <div id="toast" class="toast">Disponibilità aggiornata</div>
+
+  <!-- Chiavi e JS -->
   <script>
-  window.SUPABASE_URL = "{{ supabase_url }}";
-  window.SUPABASE_KEY = "{{ supabase_key }}";
-  window.username = "{{ username }}";
-</script>
+    window.SUPABASE_URL = "{{ supabase_url }}";
+    window.SUPABASE_KEY = "{{ supabase_key }}";
+    window.username = "{{ username }}";
+  </script>
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
