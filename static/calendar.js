@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await caricaFestivi();
   await caricaDati();
   aggiornaSettimana();
+
   document.getElementById("prevBtn").addEventListener("click", () => cambiaSettimana(-1));
   document.getElementById("nextBtn").addEventListener("click", () => cambiaSettimana(1));
   document.getElementById("inviaBtn").addEventListener("click", inviaSelezioni);
@@ -37,9 +38,10 @@ function aggiornaSettimana() {
   const oggi = new Date();
   const giornoSettimana = oggi.getDay();
   const diff = giornoSettimana === 0 ? -6 : 1 - giornoSettimana;
-  const lunediBase = new Date(oggi);
-  lunediBase.setDate(oggi.getDate() + diff);
-  const lunedi = new Date(lunediBase);
+  const lunediCorrente = new Date(oggi);
+  lunediCorrente.setDate(oggi.getDate() + diff);
+
+  const lunedi = new Date(lunediCorrente);
   lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1));
   const domenica = new Date(lunedi);
   domenica.setDate(domenica.getDate() + 6);
@@ -63,6 +65,18 @@ function aggiornaSettimana() {
     const etichetta = document.createElement("div");
     etichetta.classList.add("etichetta");
     etichetta.textContent = label;
+
+    div.appendChild(etichetta);
+
+    if (èFestivo) {
+      const festivoTag = document.createElement("div");
+      festivoTag.textContent = "FESTIVO";
+      festivoTag.style.color = "#b40000";
+      festivoTag.style.fontWeight = "bold";
+      festivoTag.style.fontSize = "0.85rem";
+      festivoTag.style.marginBottom = "0.3rem";
+      div.appendChild(festivoTag);
+    }
 
     const turniDiv = document.createElement("div");
     turniDiv.classList.add("turni");
@@ -96,11 +110,10 @@ function aggiornaSettimana() {
 
     const conteggio = document.createElement("div");
     conteggio.classList.add("conteggio");
-    const contM = (mappaDisponibilita[dataISO]?.M || 0);
-    const contP = (mappaDisponibilita[dataISO]?.P || 0);
+    const contM = mappaDisponibilita[dataISO]?.M || 0;
+    const contP = mappaDisponibilita[dataISO]?.P || 0;
     conteggio.textContent = `M: ${contM} / P: ${contP}`;
 
-    div.appendChild(etichetta);
     div.appendChild(turniDiv);
     div.appendChild(conteggio);
     griglia.appendChild(div);
@@ -156,7 +169,8 @@ function formattaDataBreve(data) {
 
 async function caricaFestivi() {
   try {
-    const res = await fetch("https://date.nager.at/api/v3/PublicHolidays/2024/IT");
+    const anno = new Date().getFullYear();
+    const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${anno}/IT`);
     const json = await res.json();
     giorniFestivi = json.map(f => f.date);
   } catch (e) {
