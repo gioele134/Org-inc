@@ -1,8 +1,8 @@
 const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
 let settimanaCorrente = 0;
-let selezionate = {};  // { "2025-04-10": "M" }
+let selezionate = {};
 let confermate = {};
-let mappaDisponibilita = {}; // { "2025-04-10": { M: 2, P: 1 } }
+let mappaDisponibilita = {};
 let giorniFestivi = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -31,21 +31,23 @@ function cambiaSettimana(differenza) {
 
 function aggiornaSettimana() {
   const griglia = document.getElementById("griglia");
+  if (!griglia) return;
   griglia.innerHTML = "";
-  aggiornaContatore();
 
   const oggi = new Date();
   const giornoSettimana = oggi.getDay();
   const diff = giornoSettimana === 0 ? -6 : 1 - giornoSettimana;
-  const lunediCorrente = new Date(oggi);
-  lunediCorrente.setDate(oggi.getDate() + diff);
-
-  const lunedi = new Date(lunediCorrente);
+  const lunediBase = new Date(oggi);
+  lunediBase.setDate(oggi.getDate() + diff);
+  const lunedi = new Date(lunediBase);
   lunedi.setDate(lunedi.getDate() + 7 * (settimanaCorrente + 1));
-
   const domenica = new Date(lunedi);
   domenica.setDate(domenica.getDate() + 6);
-  document.getElementById("titoloSettimana").textContent = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
+
+  const titolo = document.getElementById("titoloSettimana");
+  if (titolo) {
+    titolo.textContent = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
+  }
 
   for (let i = 0; i < 6; i++) {
     const giorno = new Date(lunedi);
@@ -89,8 +91,6 @@ function aggiornaSettimana() {
         aggiornaSettimana();
       });
 
-      btn.dataset.data = dataISO;
-      btn.dataset.turno = turno;
       turniDiv.appendChild(btn);
     });
 
@@ -106,8 +106,7 @@ function aggiornaSettimana() {
     griglia.appendChild(div);
   }
 
-  const dom = new Date(domenica);
-  const domLabel = `DOMENICA ${String(dom.getDate()).padStart(2, "0")}`;
+  const domLabel = `DOMENICA ${String(domenica.getDate()).padStart(2, "0")}`;
   const divDom = document.createElement("div");
   divDom.classList.add("domenica");
   divDom.textContent = domLabel;
@@ -118,7 +117,8 @@ function aggiornaSettimana() {
 
 function aggiornaContatore() {
   const totale = Object.values(selezionate).filter(Boolean).length;
-  document.getElementById("contatoreSelezioni").textContent = totale;
+  const contatore = document.getElementById("contatoreSelezioni");
+  if (contatore) contatore.textContent = totale;
 }
 
 async function inviaSelezioni() {
@@ -144,6 +144,7 @@ async function inviaSelezioni() {
 
 function mostraToast(msg) {
   const toast = document.getElementById("toast");
+  if (!toast) return;
   toast.textContent = msg;
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2000);
