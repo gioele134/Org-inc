@@ -2,17 +2,16 @@ from flask import Flask, render_template, request, redirect, url_for, session, j
 from datetime import datetime, timedelta
 from supabase import create_client
 import os
-import requests
 
 # --- Supabase setup ---
-SUPABASE_URL = "https://obeqzopopwfvkugojggs.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZXF6b3BvcHdmdmt1Z29qZ2dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDY1NzcsImV4cCI6MjA1OTI4MjU3N30._dc4v6kraW1XXpfVsFej1mfnrWF0nQ5NzBFMfxaxQt0"
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://obeqzopopwfvkugojggs.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "INSERISCI_LA_TUA_CHIAVE_SEGRETA")
 
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 # --- Flask setup ---
 app = Flask(__name__)
-app.secret_key = "tua-chiave-super-segreta"
+app.secret_key = os.environ.get("FLASK_SECRET", "chiave-super-segreta")
 
 # --- Utenti autorizzati ---
 UTENTI = {
@@ -52,13 +51,13 @@ def dati_disponibilita_turni():
 
     username = session["username"]
 
-    # Disponibilità inviate dall’utente
+    # Disponibilità dell’utente
     confermate = {}
     res = supabase.table("disponibilita").select("data, turno").eq("utente", username).execute()
     for r in res.data:
         confermate[r["data"]] = r["turno"]
 
-    # Tutte le disponibilità
+    # Totale disponibilità
     tutte = {}
     res = supabase.table("disponibilita").select("data, turno").execute()
     for r in res.data:
@@ -86,10 +85,10 @@ def aggiorna_disponibilita_turni():
         data = sel["data"]
         turno = sel["turno"]
 
-        # Rimuovi disponibilità esistente per quel giorno
+        # Rimuove precedenti disponibilità per quel giorno
         supabase.table("disponibilita").delete().eq("utente", username).eq("data", data).execute()
 
-        # Inserisci nuova
+        # Inserisce nuova disponibilità
         supabase.table("disponibilita").insert({
             "utente": username,
             "data": data,
@@ -115,11 +114,11 @@ def rimuovi_disponibilita():
 
     return redirect(url_for("riepilogo"))
 
+# --- Helper per riepilogo ---
+def utenti_per_turno(disponibilita, data_str, turno):
+    return [r["utente"] for r in disponibilita if r["data"] == data_str and r["turno"] == turno]
+
 # --- Riepilogo ---
-
-SUPABASE_URL = "https://obeqzopopwfvkugojggs.supabase.co"
-SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9iZXF6b3BvcHdmdmt1Z29qZ2dzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM3MDY1NzcsImV4cCI6MjA1OTI4MjU3N30._dc4v6kraW1XXpfVsFej1mfnrWF0nQ5NzBFMfxaxQt0"
-
 @app.route("/riepilogo")
 def riepilogo():
     if "username" not in session:
@@ -129,15 +128,9 @@ def riepilogo():
     lunedi_corrente = oggi - timedelta(days=oggi.weekday())
     settimane = []
 
-    headers = {
-        "apikey": SUPABASE_KEY,
-        "Authorization": f"Bearer {SUPABASE_KEY}",
-        "Content-Type": "application/json"
-    }
-
-    # Prendiamo tutti i dati in un'unica chiamata
-    response = requests.get(f"{SUPABASE_URL}/rest/v1/disponibilita?select=*", headers=headers)
-    disponibilita = response.json() if response.status_code == 200 else []
+    # Recupera tutte le disponibilità
+    res = supabase.table("disponibilita").select("*").execute()
+    disponibilita = res.data if res.data else []
 
     for i in range(1, 6):
         lunedi = lunedi_corrente + timedelta(weeks=i)
@@ -155,8 +148,8 @@ def riepilogo():
             data_str = giorno.strftime("%Y-%m-%d")
             giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
 
-            m = [r["utente"] for r in disponibilita if r["data"] == data_str and r["turno"] == "M"]
-            p = [r["utente"] for r in disponibilita if r["data"] == data_str and r["turno"] == "P"]
+            m = utenti_per_turno(disponibilita, data_str, "M")
+            p = utenti_per_turno(disponibilita, data_str, "P")
 
             settimana_data["giorni"].append({
                 "data": giorno_label,
@@ -169,7 +162,7 @@ def riepilogo():
 
     return render_template("riepilogo.html", settimane=settimane, username=session["username"])
 
-# --- Avvio ---
+# --- Avvio app ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
