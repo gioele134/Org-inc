@@ -106,13 +106,17 @@ function aggiornaSettimana() {
         }
 
         if (!èConfermato) {
-          btn.addEventListener("click", () => {
+          btn.addEventListener("click", (e) => {
             if (selezionate[dataISO] === turno) {
               delete selezionate[dataISO];
             } else {
               selezionate[dataISO] = turno;
             }
-            aggiornaSettimana();
+
+            // Applica stile immediato e ricarica con leggero delay
+            e.target.classList.add("selezionato");
+            aggiornaContatore();
+            setTimeout(() => aggiornaSettimana(), 20);
           });
         }
 
