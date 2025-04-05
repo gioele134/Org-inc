@@ -119,9 +119,11 @@ form.login-form button:hover {
 }
 
 .turno-btn.selezionato {
-  background-color: #198754;
-  color: white;
+  background-color: rgba(0, 128, 0, 0.8) !important;
+  color: #fff !important;
+  border: 2px solid #006400;
   font-weight: bold;
+  transition: background-color 0.2s ease;
 }
 
 /* Conteggio */
