@@ -106,17 +106,23 @@ function aggiornaSettimana() {
         }
 
         if (!èConfermato) {
-          btn.addEventListener("click", (e) => {
+          btn.addEventListener("click", () => {
             if (selezionate[dataISO] === turno) {
               delete selezionate[dataISO];
             } else {
               selezionate[dataISO] = turno;
             }
 
-            // Applica stile immediato e ricarica con leggero delay
-            e.target.classList.add("selezionato");
+            turniDiv.querySelectorAll(".turno-btn").forEach(b => b.classList.remove("selezionato"));
+            if (selezionate[dataISO]) {
+              turniDiv.querySelectorAll(".turno-btn").forEach(b => {
+                if (b.textContent === selezionate[dataISO]) {
+                  b.classList.add("selezionato");
+                }
+              });
+            }
+
             aggiornaContatore();
-            setTimeout(() => aggiornaSettimana(), 20);
           });
         }
 
