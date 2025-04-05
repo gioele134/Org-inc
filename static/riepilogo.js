@@ -15,8 +15,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const { data, error } = await supabase.from("disponibilita").select("*");
-  if (error || !data || data.length === 0) {
-    container.innerHTML = "<p>Errore nel caricamento dei dati o nessuna disponibilità trovata.</p>";
+  if (error || !data) {
+    container.innerHTML = "<p>Errore nel caricamento dei dati.</p>";
     return;
   }
 
@@ -63,9 +63,9 @@ function aggiornaSettimana() {
   }
 }
 
-// --- FORMATTA UTENTI CON BOTTONE RIMOZIONE ---
+// --- FORMATTA UTENTI CON RIMOZIONE ---
 function renderTurno(lista, dataISO, turno) {
-  if (!lista || lista.length === 0) return "nessuno";
+  if (!lista || lista.length === 0) return "";  // Nessuna scritta per turni vuoti
 
   return lista.map(utente => {
     if (utente === window.username) {
