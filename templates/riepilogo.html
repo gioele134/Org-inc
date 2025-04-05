@@ -1,46 +1,128 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>Riepilogo Disponibilità</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-</head>
-<body>
+// --- CONFIGURAZIONE SUPABASE ---
+const supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
-  <header>
-    <h2>Riepilogo Disponibilità</h2>
-    <p>Benvenuto, {{ username }}</p>
-    <nav>
-      <a href="{{ url_for('calendario') }}">← Torna al calendario</a>
-      <a href="{{ url_for('logout') }}">Logout</a>
-    </nav>
-  </header>
+// --- VARIABILI GLOBALI ---
+let settimanaCorrente = 0;
+let settimane = [];
 
-  <main>
-    <noscript>
-      <div style="color: red; text-align: center; margin: 1rem;">
-        Questa pagina richiede JavaScript per funzionare correttamente.
-      </div>
-    </noscript>
-    <div id="settimaneContainer" class="riepilogo"></div>
-  </main>
+// --- DOM READY ---
+document.addEventListener("DOMContentLoaded", async () => {
+  const container = document.getElementById("settimaneContainer");
 
-  <!-- Barra di controllo fissa in basso -->
-  <div class="barra-controllo">
-    <button id="prevSettimana">← Settimana precedente</button>
-    <button id="nextSettimana">Settimana successiva →</button>
-  </div>
+  if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
+    container.innerHTML = "<p style='color: red;'>Errore: Supabase URL o KEY non definite.</p>";
+    return;
+  }
 
-  <!-- Toast di conferma -->
-  <div id="toast" class="toast">Disponibilità aggiornata</div>
+  const { data, error } = await supabase.from("disponibilita").select("*");
 
-  <!-- Inizializzazione Supabase e JS -->
-  <script>
-    window.SUPABASE_URL = "{{ supabase_url | safe }}";
-    window.SUPABASE_KEY = "{{ supabase_key | safe }}";
-    window.username = "{{ username | safe }}";
-  </script>
-  <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
-</body>
-</html>
+  if (error || !data || data.length === 0) {
+    container.innerHTML = "<p style='color: red;'>Errore nel caricamento dei dati o nessuna disponibilità trovata.</p>";
+    return;
+  }
+
+  settimane = organizzaPerSettimane(data);
+  aggiornaSettimana();
+
+  document.getElementById("prevSettimana").addEventListener("click", () => cambiaSettimana(-1));
+  document.getElementById("nextSettimana").addEventListener("click", () => cambiaSettimana(1));
+});
+
+// --- CAMBIO SETTIMANA ---
+function cambiaSettimana(delta) {
+  const nuova = settimanaCorrente + delta;
+  if (nuova >= 0 && nuova < settimane.length) {
+    settimanaCorrente = nuova;
+    aggiornaSettimana();
+  }
+}
+
+// --- RENDERING SETTIMANA ---
+function aggiornaSettimana() {
+  const contenitore = document.getElementById("settimaneContainer");
+  contenitore.innerHTML = "";
+
+  const settimana = settimane[settimanaCorrente];
+  if (!settimana) {
+    contenitore.innerHTML = "<p>Nessuna disponibilità per questa settimana.</p>";
+    return;
+  }
+
+  document.getElementById("titoloSettimana").textContent =
+    `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
+
+  for (const giorno of Object.values(settimana.giorni)) {
+    const giornoDiv = document.createElement("div");
+    giornoDiv.classList.add("giorno-riepilogo");
+
+    giornoDiv.innerHTML = `
+      <strong>${giorno.data}</strong>
+      <div><b>M:</b> ${renderTurno(giorno.M)}</div>
+      <div><b>P:</b> ${renderTurno(giorno.P)}</div>
+    `;
+
+    contenitore.appendChild(giornoDiv);
+  }
+}
+
+// --- FORMATTAZIONE DATI ---
+function renderTurno(lista) {
+  if (!lista || lista.length === 0) return "nessuno";
+  return lista.join(", ");
+}
+
+function organizzaPerSettimane(disponibilita) {
+  const settimaneMap = new Map();
+
+  disponibilita.forEach(record => {
+    const dataISO = record.data;
+    const dataObj = new Date(dataISO);
+    const settimanaNum = getSettimana(dataObj);
+
+    if (!settimaneMap.has(settimanaNum)) {
+      settimaneMap.set(settimanaNum, {
+        numero: settimanaNum,
+        inizio: getMonday(dataObj).toLocaleDateString("it-IT"),
+        fine: getSunday(dataObj).toLocaleDateString("it-IT"),
+        giorni: {}
+      });
+    }
+
+    const settimana = settimaneMap.get(settimanaNum);
+    const giornoLabel = dataObj.toLocaleDateString("it-IT", { weekday: "long", day: "2-digit" }).toUpperCase();
+    const giornoKey = dataISO;
+
+    if (!settimana.giorni[giornoKey]) {
+      settimana.giorni[giornoKey] = {
+        data: giornoLabel,
+        M: [],
+        P: []
+      };
+    }
+
+    settimana.giorni[giornoKey][record.turno].push(record.utente);
+  });
+
+  return Array.from(settimaneMap.values()).sort((a, b) => a.numero - b.numero);
+}
+
+// --- UTILS SETTIMANE ---
+function getMonday(date) {
+  const d = new Date(date);
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  return new Date(d.setDate(diff));
+}
+
+function getSunday(date) {
+  const monday = getMonday(date);
+  return new Date(monday.getTime() + 6 * 86400000);
+}
+
+function getSettimana(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
