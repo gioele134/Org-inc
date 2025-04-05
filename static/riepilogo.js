@@ -1,64 +1,125 @@
 // --- CONFIGURAZIONE SUPABASE ---
-const { createClient } = supabase;
-const supabaseClient = createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+const supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
 // --- VARIABILI GLOBALI ---
 let settimanaCorrente = 0;
 let settimane = [];
 
-// --- FUNZIONE UTILE PER CALCOLO SETTIMANA ---
-Date.prototype.getWeek = function () {
-  const date = new Date(this.getTime());
-  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  return Math.ceil((((date - yearStart) / 86400000) + 1) / 7);
-};
-
 // --- DOM READY ---
 document.addEventListener("DOMContentLoaded", async () => {
-  await caricaDatiDaSupabase();
+  const container = document.getElementById("settimaneContainer");
+  if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
+    container.innerHTML = "<p>Errore: Supabase URL o KEY non definite.</p>";
+    return;
+  }
+
+  const { data, error } = await supabase.from("disponibilita").select("*");
+
+  if (error || !data || data.length === 0) {
+    container.innerHTML = "<p>Errore nel caricamento dei dati o nessuna disponibilità trovata.</p>";
+    return;
+  }
+
+  settimane = organizzaPerSettimane(data);
   aggiornaSettimana();
 
   document.getElementById("prevSettimana").addEventListener("click", () => cambiaSettimana(-1));
   document.getElementById("nextSettimana").addEventListener("click", () => cambiaSettimana(1));
 });
 
-// --- RECUPERO DATI DA SUPABASE ---
-async function caricaDatiDaSupabase() {
-  const { data, error } = await supabaseClient.from("disponibilita").select("*");
+// --- CAMBIO SETTIMANA ---
+function cambiaSettimana(delta) {
+  const nuova = settimanaCorrente + delta;
+  if (nuova >= 0 && nuova < settimane.length) {
+    settimanaCorrente = nuova;
+    aggiornaSettimana();
+  }
+}
 
-  if (error) {
-    console.error("Errore nel caricamento dei dati:", error);
+// --- RENDERING SETTIMANA ---
+function aggiornaSettimana() {
+  const contenitore = document.getElementById("settimaneContainer");
+  contenitore.innerHTML = "";
+
+  const settimana = settimane[settimanaCorrente];
+  if (!settimana) {
+    contenitore.innerHTML = "<p>Nessuna disponibilità per questa settimana.</p>";
     return;
   }
 
-  settimane = organizzaPerSettimane(data);
+  document.getElementById("titoloSettimana").textContent =
+    `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
+
+  for (const giorno of Object.values(settimana.giorni)) {
+    const giornoDiv = document.createElement("div");
+    giornoDiv.classList.add("giorno-riepilogo");
+
+    giornoDiv.innerHTML = `
+      <strong>${giorno.data}</strong>
+      <div><b>M:</b> ${renderTurno(giorno.M, giorno.data_iso, "M")}</div>
+      <div><b>P:</b> ${renderTurno(giorno.P, giorno.data_iso, "P")}</div>
+    `;
+
+    contenitore.appendChild(giornoDiv);
+  }
 }
 
-// --- ORGANIZZAZIONE PER SETTIMANA ---
+// --- RENDER UTENTI CON POSSIBILE CANCELLAZIONE ---
+function renderTurno(lista, dataISO, turno) {
+  if (!lista || lista.length === 0) return "nessuno";
+
+  return lista.map(utente => {
+    if (utente === window.username) {
+      return `
+        <span>
+          ${utente}
+          <button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="rimuovi-btn">✖</button>
+        </span>
+      `;
+    } else {
+      return utente;
+    }
+  }).join(", ");
+}
+
+// --- CANCELLA TURNO ---
+async function rimuoviTurno(data, turno) {
+  const { error } = await supabase
+    .from("disponibilita")
+    .delete()
+    .eq("utente", window.username)
+    .eq("data", data)
+    .eq("turno", turno);
+
+  if (!error) {
+    mostraToast("Turno rimosso");
+    const { data: aggiornata } = await supabase.from("disponibilita").select("*");
+    settimane = organizzaPerSettimane(aggiornata);
+    aggiornaSettimana();
+  }
+}
+
+// --- FORMATTAZIONE DATI ---
 function organizzaPerSettimane(disponibilita) {
   const settimaneMap = new Map();
 
   disponibilita.forEach(record => {
-    const dataISO = record.data; // "2025-04-08"
+    const dataISO = record.data;
     const dataObj = new Date(dataISO);
-    const settimanaNum = dataObj.getWeek();
-    const lunedi = getMonday(dataObj);
-    const domenica = getSunday(dataObj);
+    const settimanaNum = getSettimana(dataObj);
 
     if (!settimaneMap.has(settimanaNum)) {
       settimaneMap.set(settimanaNum, {
         numero: settimanaNum,
-        inizio: lunedi.toLocaleDateString("it-IT"),
-        fine: domenica.toLocaleDateString("it-IT"),
+        inizio: getMonday(dataObj).toLocaleDateString("it-IT"),
+        fine: getSunday(dataObj).toLocaleDateString("it-IT"),
         giorni: {}
       });
     }
 
     const settimana = settimaneMap.get(settimanaNum);
     const giornoLabel = dataObj.toLocaleDateString("it-IT", {
-      weekday: "long",
-      day: "2-digit"
+      weekday: "long", day: "2-digit"
     }).toUpperCase();
     const giornoKey = dataISO;
 
@@ -77,47 +138,7 @@ function organizzaPerSettimane(disponibilita) {
   return Array.from(settimaneMap.values()).sort((a, b) => a.numero - b.numero);
 }
 
-// --- CAMBIO SETTIMANA ---
-function cambiaSettimana(delta) {
-  const nuova = settimanaCorrente + delta;
-  if (nuova >= 0 && nuova < settimane.length) {
-    settimanaCorrente = nuova;
-    aggiornaSettimana();
-  }
-}
-
-// --- AGGIORNA INTERFACCIA ---
-function aggiornaSettimana() {
-  const contenitore = document.getElementById("settimaneContainer");
-  contenitore.innerHTML = "";
-
-  const settimana = settimane[settimanaCorrente];
-  if (!settimana) return;
-
-  document.getElementById("titoloSettimana").textContent =
-    `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
-
-  for (const giorno of Object.values(settimana.giorni)) {
-    const giornoDiv = document.createElement("div");
-    giornoDiv.classList.add("giorno-riepilogo");
-
-    giornoDiv.innerHTML = `
-      <strong>${giorno.data}</strong>
-      <div><b>M:</b> ${renderTurno(giorno.M)}</div>
-      <div><b>P:</b> ${renderTurno(giorno.P)}</div>
-    `;
-
-    contenitore.appendChild(giornoDiv);
-  }
-}
-
-// --- RENDER LISTA UTENTI PER TURNO ---
-function renderTurno(lista) {
-  if (!lista || lista.length === 0) return "nessuno";
-  return lista.join(", ");
-}
-
-// --- FUNZIONI PER CALCOLARE LUNEDÌ E DOMENICA ---
+// --- UTILS ---
 function getMonday(date) {
   const d = new Date(date);
   const day = d.getDay();
@@ -128,4 +149,21 @@ function getMonday(date) {
 function getSunday(date) {
   const monday = getMonday(date);
   return new Date(monday.getTime() + 6 * 86400000);
+}
+
+function getSettimana(date) {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+}
+
+// --- TOAST ---
+function mostraToast(msg) {
+  const toast = document.getElementById("toast");
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2000);
 }
