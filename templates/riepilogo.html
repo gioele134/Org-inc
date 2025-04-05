@@ -18,6 +18,11 @@
   </header>
 
   <main>
+    <noscript>
+      <div style="color: red; text-align: center; margin: 1rem;">
+        Questa pagina richiede JavaScript per funzionare correttamente.
+      </div>
+    </noscript>
     <div id="settimaneContainer" class="riepilogo"></div>
   </main>
 
@@ -30,11 +35,11 @@
   <!-- Toast di conferma -->
   <div id="toast" class="toast">Disponibilità aggiornata</div>
 
-  <!-- Chiavi e JS -->
+  <!-- Inizializzazione Supabase e JS -->
   <script>
-    window.SUPABASE_URL = "{{ supabase_url }}";
-    window.SUPABASE_KEY = "{{ supabase_key }}";
-    window.username = "{{ username }}";
+    window.SUPABASE_URL = "{{ supabase_url | safe }}";
+    window.SUPABASE_KEY = "{{ supabase_key | safe }}";
+    window.username = "{{ username | safe }}";
   </script>
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
