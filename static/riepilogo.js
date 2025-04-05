@@ -1,5 +1,5 @@
 // --- CONFIGURAZIONE SUPABASE ---
-const supabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
 // --- VARIABILI GLOBALI ---
 let settimanaCorrente = 0;
@@ -8,13 +8,13 @@ let settimane = [];
 // --- DOM READY ---
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("settimaneContainer");
+
   if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
     container.innerHTML = "<p>Errore: Supabase URL o KEY non definite.</p>";
     return;
   }
 
   const { data, error } = await supabase.from("disponibilita").select("*");
-
   if (error || !data || data.length === 0) {
     container.innerHTML = "<p>Errore nel caricamento dei dati o nessuna disponibilità trovata.</p>";
     return;
@@ -36,7 +36,7 @@ function cambiaSettimana(delta) {
   }
 }
 
-// --- RENDERING SETTIMANA ---
+// --- AGGIORNA SETTIMANA ---
 function aggiornaSettimana() {
   const contenitore = document.getElementById("settimaneContainer");
   contenitore.innerHTML = "";
@@ -47,8 +47,7 @@ function aggiornaSettimana() {
     return;
   }
 
-  document.getElementById("titoloSettimana").textContent =
-    `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
+  document.getElementById("titoloSettimana").textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
 
   for (const giorno of Object.values(settimana.giorni)) {
     const giornoDiv = document.createElement("div");
@@ -64,32 +63,29 @@ function aggiornaSettimana() {
   }
 }
 
-// --- RENDER UTENTI CON POSSIBILE CANCELLAZIONE ---
+// --- FORMATTA UTENTI CON BOTTONE RIMOZIONE ---
 function renderTurno(lista, dataISO, turno) {
   if (!lista || lista.length === 0) return "nessuno";
 
   return lista.map(utente => {
     if (utente === window.username) {
       return `
-        <span>
-          ${utente}
-          <button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="rimuovi-btn">✖</button>
-        </span>
+        ${utente}
+        <button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>
       `;
-    } else {
-      return utente;
     }
+    return utente;
   }).join(", ");
 }
 
-// --- CANCELLA TURNO ---
+// --- RIMUOVI TURNO UTENTE ---
 async function rimuoviTurno(data, turno) {
   const { error } = await supabase
     .from("disponibilita")
     .delete()
-    .eq("utente", window.username)
     .eq("data", data)
-    .eq("turno", turno);
+    .eq("turno", turno)
+    .eq("utente", window.username);
 
   if (!error) {
     mostraToast("Turno rimosso");
@@ -99,7 +95,7 @@ async function rimuoviTurno(data, turno) {
   }
 }
 
-// --- FORMATTAZIONE DATI ---
+// --- ORGANIZZAZIONE DATI ---
 function organizzaPerSettimane(disponibilita) {
   const settimaneMap = new Map();
 
@@ -118,18 +114,11 @@ function organizzaPerSettimane(disponibilita) {
     }
 
     const settimana = settimaneMap.get(settimanaNum);
-    const giornoLabel = dataObj.toLocaleDateString("it-IT", {
-      weekday: "long", day: "2-digit"
-    }).toUpperCase();
     const giornoKey = dataISO;
+    const giornoLabel = dataObj.toLocaleDateString("it-IT", { weekday: "long", day: "2-digit" }).toUpperCase();
 
     if (!settimana.giorni[giornoKey]) {
-      settimana.giorni[giornoKey] = {
-        data: giornoLabel,
-        data_iso: dataISO,
-        M: [],
-        P: []
-      };
+      settimana.giorni[giornoKey] = { data: giornoLabel, data_iso: dataISO, M: [], P: [] };
     }
 
     settimana.giorni[giornoKey][record.turno].push(record.utente);
@@ -138,7 +127,7 @@ function organizzaPerSettimane(disponibilita) {
   return Array.from(settimaneMap.values()).sort((a, b) => a.numero - b.numero);
 }
 
-// --- UTILS ---
+// --- UTILS SETTIMANA ---
 function getMonday(date) {
   const d = new Date(date);
   const day = d.getDay();
