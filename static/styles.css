@@ -194,3 +194,20 @@ form.login-form button:hover {
     gap: 0.5rem;
   }
 }
+
+.rimuovi-btn {
+  background-color: rgba(255, 0, 0, 0.8); /* rosso trasparente */
+  color: white;                           /* ✖ bianca */
+  border: none;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  margin-left: 6px;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  vertical-align: middle;
+}
+
+.rimuovi-btn:hover {
+  background-color: rgba(200, 0, 0, 0.9);
+}
