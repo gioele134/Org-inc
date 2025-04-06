@@ -49,51 +49,88 @@ function aggiornaSettimana() {
 
   document.getElementById("titoloSettimana").textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
 
-  // Sezione: Turni al completo
-  const bloccoCompleti = document.createElement("div");
-  bloccoCompleti.innerHTML = "<h3>Turni al completo</h3>";
-
-  // Sezione: Turni incompleti
-  const bloccoIncompleti = document.createElement("div");
-  bloccoIncompleti.innerHTML = "<h3>TurniIncompleti</h3>";
+  const turniCompleti = [];
+  const turniIncompleti = [];
 
   for (const giorno of Object.values(settimana.giorni)) {
     ["M", "P"].forEach(turno => {
-      const adesioni = giorno[turno] || [];
-      if (adesioni.length === 0) return; // ignora turni vuoti
+      const lista = giorno[turno] || [];
+      const label = `${giorno.data.toLowerCase()} ${turno === "M" ? "mattina" : "pomeriggio"}`;
 
-      const div = document.createElement("div");
-      div.classList.add("giorno-riepilogo");
-
-      const titolo = `${giorno.data.toLowerCase()} ${turno === "M" ? "mattina" : "pomeriggio"}`;
-      let html = `<strong>${titolo}</strong><div>`;
-
-      adesioni.forEach((utente, i) => {
-        const colore = i === 2 ? "colore-terzo" : i < 2 ? "colore-primi" : "";
-        html += `<span class="${colore}">${utente}</span>`;
-        if (utente === window.username) {
-          html += `<button onclick="rimuoviTurno('${giorno.data_iso}', '${turno}')" class="btn-rimuovi">✖</button>`;
-        }
-        html += " ";
-      });
-
-      if (!adesioni.includes(window.username) && adesioni.length < 3) {
-        html += `<button onclick="aderisciTurno('${giorno.data_iso}', '${turno}')" class="btn-aderisci">aderisci</button>`;
-      }
-
-      html += "</div>";
-      div.innerHTML = html;
-
-      if (adesioni.length === 3) {
-        bloccoCompleti.appendChild(div);
-      } else {
-        bloccoIncompleti.appendChild(div);
+      if (lista.length === 3) {
+        turniCompleti.push({
+          label,
+          utenti: lista,
+          data: giorno.data_iso,
+          turno
+        });
+      } else if (lista.length > 0) {
+        turniIncompleti.push({
+          label,
+          utenti: lista,
+          data: giorno.data_iso,
+          turno
+        });
       }
     });
   }
 
-  contenitore.appendChild(bloccoCompleti);
-  contenitore.appendChild(bloccoIncompleti);
+  if (turniCompleti.length > 0) {
+    const titolo = document.createElement("h3");
+    titolo.textContent = "Turni al completo";
+    contenitore.appendChild(titolo);
+
+    turniCompleti.forEach(turno => {
+      const div = document.createElement("div");
+      div.classList.add("giorno-riepilogo");
+      div.innerHTML = `
+        <strong>${turno.label}</strong>
+        <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
+      `;
+      contenitore.appendChild(div);
+    });
+  }
+
+  if (turniIncompleti.length > 0) {
+    const titolo = document.createElement("h3");
+    titolo.textContent = "Turni incompleti";
+    contenitore.appendChild(titolo);
+
+    turniIncompleti.forEach(turno => {
+      const div = document.createElement("div");
+      div.classList.add("giorno-riepilogo");
+      div.innerHTML = `
+        <strong>${turno.label}</strong>
+        <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
+      `;
+      contenitore.appendChild(div);
+    });
+  }
+}
+
+// --- FORMATTA UTENTI CON RIMOZIONE / ADESIONE ---
+function renderTurno(lista, dataISO, turno) {
+  let html = "";
+
+  lista.forEach((utente, index) => {
+    const colorClass = index === 2 ? "blue" : index < 2 ? "green" : "grey";
+    html += `<span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}</span>`;
+
+    if (utente === window.username) {
+      html += `
+        <button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>
+      `;
+    }
+    html += " ";
+  });
+
+  if (!lista.includes(window.username) && lista.length < 3) {
+    html += `
+      <button onclick="aderisciTurno('${dataISO}', '${turno}')" class="btn-aderisci">aderisci</button>
+    `;
+  }
+
+  return html;
 }
 
 // --- RIMUOVI TURNO UTENTE ---
