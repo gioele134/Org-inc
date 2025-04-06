@@ -2,42 +2,54 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
+  <title>Riepilogo Disponibilità</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Riepilogo Turni</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 
   <header>
-    <h1>Riepilogo Turni</h1>
+    <h2>Riepilogo Disponibilità</h2>
+    <p>Benvenuto, {{ username }}</p>
+    <nav>
+      <a href="{{ url_for('calendario') }}">← Torna al calendario</a>
+      <a href="{{ url_for('logout') }}">Logout</a>
+    </nav>
   </header>
 
   <main>
+    <div id="settimaneContainer" class="riepilogo"></div>
+  </main>
 
-    <!-- Sezione Turni al Completo -->
+  <div class="barra-controllo">
+    <button id="prevSettimana">←</button>
+    <span id="titoloSettimana"></span>
+    <button id="nextSettimana">→</button>
+  </div>
+
+  <!-- Sezione Turni al Completo -->
     <section id="turni-completi">
       <h2>Turni al Completo</h2>
       <!-- I turni completi verranno inseriti qui dinamicamente -->
     </section>
 
-    <!-- Selettore per Filtrare i Turni Incompleti -->
-    <div class="filtro-turni">
-      <label for="filtroIncompleti">Filtra turni incompleti:</label>
-      <select id="filtroIncompleti">
-        <option value="tutti">Tutti</option>
-        <option value="uno">Solo 1 adesione</option>
-        <option value="due">Solo 2 adesioni</option>
-      </select>
-    </div>
+  <div class="filtro-turni">
+    <select id="filtroIncompleti">
+      <option value="tutti">Tutti</option>
+      <option value="uno">Solo 1 adesione</option>
+      <option value="due">Solo 2 adesioni</option>
+    </select>
+  </div>
 
-    <!-- Sezione Turni Incompleti -->
-    <section id="turni-incompleti">
-      <h2>Turni Incompleti</h2>
-      <!-- I turni incompleti verranno inseriti qui dinamicamente -->
-    </section>
+  <div id="toast" class="toast">Turno rimosso</div>
 
-  </main>
+  <script>
+    window.SUPABASE_URL = "{{ supabase_url }}";
+    window.SUPABASE_KEY = "{{ supabase_key }}";
+    window.username = "{{ username }}";
+  </script>
 
-  <script src="script.js"></script>
+  <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
