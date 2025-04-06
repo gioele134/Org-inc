@@ -10,7 +10,7 @@ body {
   background-color: #f4f4f4;
   color: #333;
   min-height: 100vh;
-  padding-bottom: 70px;
+  padding-bottom: 100px; /* spazio per barra fissa */
 }
 
 /* Header */
@@ -133,8 +133,6 @@ form.login-form button:hover {
 .conteggio {
   font-size: 0.9rem;
   color: #666;
-  text-align: center;
-  margin-top: 0.3rem;
 }
 
 /* Barra di controllo fissa */
@@ -145,20 +143,20 @@ form.login-form button:hover {
   width: 100%;
   background: #ffffff;
   border-top: 1px solid #ccc;
-  padding: 0.4rem 0.6rem;
+  padding: 0.7rem 1rem;
   z-index: 1000;
 }
 
-.barra-controllo .bottoni {
+.barra-controllo .bottoni-navigazione {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 0.5rem;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
 }
 
 .barra-controllo button {
-  flex: 1;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem 1.2rem;
   font-size: 1rem;
   border-radius: 6px;
   border: none;
@@ -166,10 +164,19 @@ form.login-form button:hover {
   background-color: #0a9396;
   color: white;
   font-weight: bold;
+  flex: 1;
+  text-align: center;
 }
 
 .barra-controllo button:hover {
   background-color: #007d82;
+}
+
+.barra-controllo #titoloSettimana {
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #555;
 }
 
 /* Toast */
@@ -193,14 +200,14 @@ form.login-form button:hover {
 
 /* Responsive */
 @media (max-width: 600px) {
-  .barra-controllo .bottoni {
-    flex-direction: row;
-    justify-content: space-around;
-  }
-
   .turni {
     display: flex;
     justify-content: space-around;
+  }
+
+  .barra-controllo .bottoni-navigazione {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
@@ -209,7 +216,7 @@ form.login-form button:hover {
   font-size: 1rem;
   font-weight: bold;
   text-align: center;
-  margin: 0.6rem 0 0.3rem;
+  margin-bottom: 1rem;
   color: #0077cc;
 }
 
@@ -222,11 +229,13 @@ form.login-form button:hover {
   background-color: #f9f9f9;
 }
 
+/* Turni completi */
 .turno-completo {
   background-color: #e6f0ff;
   border-left: 5px solid #0077cc;
 }
 
+/* Etichetta del giorno */
 .giorno-riepilogo strong {
   display: block;
   font-size: 0.95rem;
@@ -235,6 +244,7 @@ form.login-form button:hover {
   margin-bottom: 0.4rem;
 }
 
+/* Dettagli turni */
 .giorno-riepilogo div {
   font-size: 0.9rem;
   margin: 0.2rem 0;
@@ -246,9 +256,10 @@ form.login-form button:hover {
 /* Badge utente */
 .turno-badge {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.4rem 0.6rem;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.3rem 0.6rem;
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -284,7 +295,7 @@ form.login-form button:hover {
   color: #555;
 }
 
-/* Bottoni turno */
+/* Bottone aderisci */
 .btn-aderisci {
   background-color: #0a9396;
   color: white;
@@ -300,6 +311,7 @@ form.login-form button:hover {
   background-color: #007d82;
 }
 
+/* Bottone rimuovi */
 .btn-rimuovi {
   background-color: rgba(220, 53, 69, 0.8);
   color: white;
@@ -315,30 +327,11 @@ form.login-form button:hover {
   background-color: rgba(200, 30, 50, 0.9);
 }
 
-/* Select menu a tendina */
-select#filtroIncompleti {
-  width: 100%;
-  max-width: 300px;
-  margin: 0.8rem auto;
-  padding: 0.4rem 0.6rem;
-  font-size: 1rem;
-  border: 1px solid #888;
-  border-radius: 6px;
-  background-color: #f0f0f0;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 0.6rem center;
-  background-size: 1rem;
-}
-
-/* Select mobile */
-@media (max-width: 480px) {
-  select#filtroIncompleti {
-    font-size: 0.9rem;
-  }
+/* Filtro turni incompleti */
+.filtro-turni {
+  display: flex;
+  justify-content: center;
+  margin: 1rem auto 0;
 }
 
 .filtro-turni select {
