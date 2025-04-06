@@ -1,15 +1,18 @@
 /* Reset base */
 * {
   box-sizing: border-box;
-  margin: 0.5rem;
-  padding: 0.5rem;
+  margin: 0;
+  padding: 0
 }
 
 body {
+  justify-content:center;
   font-family: "Segoe UI", sans-serif;
   background-color: #f4f4f4;
   color: #333;
   min-height: 100vh;
+  margin: 0.5rem;
+  padding: 0.5rem;
   padding-bottom: 100px; /* spazio per barra fissa */
 }
 
