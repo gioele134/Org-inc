@@ -15,9 +15,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   const { data, error } = await supabase
-  .from("disponibilita")
-  .select("*")
-  .order("inserito_il", { ascending: true });
+    .from("disponibilita")
+    .select("*")
+    .order("inserito_il", { ascending: true });
+
   if (error || !data) {
     container.innerHTML = "<p>Errore nel caricamento dei dati.</p>";
     return;
@@ -57,7 +58,6 @@ function aggiornaSettimana() {
   titolo.textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
   contenitore.appendChild(titolo);
 
-  // Turni al completo
   const turniCompleti = [];
   const turniIncompleti = [];
 
@@ -90,7 +90,6 @@ function aggiornaSettimana() {
     });
   }
 
-  // Turni incompleti
   const filtro = document.getElementById("filtroIncompleti").value;
   const daMostrare = turniIncompleti.filter(turno =>
     filtro === "tutti" ||
@@ -112,6 +111,10 @@ function aggiornaSettimana() {
       `;
       contenitore.appendChild(div);
     });
+  } else {
+    const avviso = document.createElement("p");
+    avviso.innerHTML = `Non ci sono turni incompleti. <a href="/calendario">Seleziona date dal calendario</a>.`;
+    contenitore.appendChild(avviso);
   }
 }
 
@@ -121,7 +124,9 @@ function renderTurno(lista, dataISO, turno) {
 
   lista.forEach((utente, index) => {
     const colorClass = index === 2 ? "blue" : index < 2 ? "green" : "grey";
-    html += `<span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}</span>`;
+    const ora = window.timestampMap?.[dataISO]?.[turno]?.[utente] || "";
+    const orario = ora ? ` <small>${formatDateTime(ora)}</small>` : "";
+    html += `<span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}${orario}</span>`;
 
     if (utente === window.username) {
       html += `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>`;
@@ -137,6 +142,11 @@ function renderTurno(lista, dataISO, turno) {
   return html;
 }
 
+function formatDateTime(timestamp) {
+  const date = new Date(timestamp);
+  return `${date.toLocaleDateString("it-IT")} ${date.toLocaleTimeString("it-IT", { hour: '2-digit', minute: '2-digit' })}`;
+}
+
 // --- RIMUOVI TURNO UTENTE ---
 async function rimuoviTurno(data, turno) {
   const { error } = await supabase
@@ -148,7 +158,10 @@ async function rimuoviTurno(data, turno) {
 
   if (!error) {
     mostraToast("Turno rimosso");
-    const { data: aggiornata } = await supabase.from("disponibilita").select("*");
+    const { data: aggiornata } = await supabase
+      .from("disponibilita")
+      .select("*")
+      .order("inserito_il", { ascending: true });
     settimane = organizzaPerSettimane(aggiornata);
     aggiornaSettimana();
   }
@@ -162,7 +175,10 @@ async function aderisciTurno(data, turno) {
 
   if (!error) {
     mostraToast("Aderito al turno");
-    const { data: aggiornata } = await supabase.from("disponibilita").select("*");
+    const { data: aggiornata } = await supabase
+      .from("disponibilita")
+      .select("*")
+      .order("inserito_il", { ascending: true });
     settimane = organizzaPerSettimane(aggiornata);
     aggiornaSettimana();
   }
@@ -171,10 +187,11 @@ async function aderisciTurno(data, turno) {
 // --- ORGANIZZAZIONE DATI ---
 function organizzaPerSettimane(disponibilita) {
   const settimaneMap = new Map();
+  const timestamps = {};
 
   disponibilita.forEach(record => {
-    const dataISO = record.data;
-    const dataObj = new Date(dataISO);
+    const { data, turno, utente, inserito_il } = record;
+    const dataObj = new Date(data);
     const settimanaNum = getSettimana(dataObj);
 
     if (!settimaneMap.has(settimanaNum)) {
@@ -187,15 +204,21 @@ function organizzaPerSettimane(disponibilita) {
     }
 
     const settimana = settimaneMap.get(settimanaNum);
-    const giornoKey = dataISO;
+    const giornoKey = data;
     const giornoLabel = dataObj.toLocaleDateString("it-IT", { weekday: "long", day: "2-digit" }).toUpperCase();
 
     if (!settimana.giorni[giornoKey]) {
-      settimana.giorni[giornoKey] = { data: giornoLabel, data_iso: dataISO, M: [], P: [] };
+      settimana.giorni[giornoKey] = { data: giornoLabel, data_iso: data, M: [], P: [] };
     }
 
-    settimana.giorni[giornoKey][record.turno].push(record.utente);
+    settimana.giorni[giornoKey][turno].push(utente);
+
+    if (!timestamps[data]) timestamps[data] = {};
+    if (!timestamps[data][turno]) timestamps[data][turno] = {};
+    timestamps[data][turno][utente] = inserito_il;
   });
+
+  window.timestampMap = timestamps;
 
   return Array.from(settimaneMap.values()).sort((a, b) => a.numero - b.numero);
 }
