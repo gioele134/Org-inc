@@ -326,3 +326,57 @@ form.login-form button:hover {
 .btn-aderisci:hover {
   background-color: #007d82;
 }
+
+/* --- FILTRO TURNI INCOMPLETI --- */
+.filtro-turni {
+  display: flex;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}
+
+.filtro-turni button {
+  padding: 0.4rem 1rem;
+  font-size: 0.9rem;
+  border-radius: 6px;
+  border: 1px solid #aaa;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background 0.2s ease;
+}
+
+.filtro-turni button:hover:not(:disabled) {
+  background-color: #e0e0e0;
+}
+
+.filtro-turni button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  font-weight: bold;
+}
+
+/* --- BADGE UTENTE PER TURNO --- */
+.turno-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  margin-right: 0.3rem;
+  background-color: #ddd;
+  color: #000;
+}
+
+.turno-badge .icon {
+  margin-right: 0.3rem;
+}
+
+.turno-badge.green {
+  background-color: #d0f0d0;
+  color: #1e7d1e;
+}
+
+.turno-badge.blue {
+  background-color: #cce0ff;
+  color: #004e9a;
+}
