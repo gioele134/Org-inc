@@ -49,56 +49,51 @@ function aggiornaSettimana() {
 
   document.getElementById("titoloSettimana").textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
 
+  // Sezione: Turni al completo
+  const bloccoCompleti = document.createElement("div");
+  bloccoCompleti.innerHTML = "<h3>Turni al completo</h3>";
+
+  // Sezione: Turni incompleti
+  const bloccoIncompleti = document.createElement("div");
+  bloccoIncompleti.innerHTML = "<h3>TurniIncompleti</h3>";
+
   for (const giorno of Object.values(settimana.giorni)) {
-    const giornoDiv = document.createElement("div");
-    giornoDiv.classList.add("giorno-riepilogo");
+    ["M", "P"].forEach(turno => {
+      const adesioni = giorno[turno] || [];
+      if (adesioni.length === 0) return; // ignora turni vuoti
 
-    // Mostra solo i turni che hanno almeno una adesione
-    if ((giorno.M && giorno.M.length > 0) || (giorno.P && giorno.P.length > 0)) {
-      giornoDiv.innerHTML = `<strong>${giorno.data}</strong>`;
+      const div = document.createElement("div");
+      div.classList.add("giorno-riepilogo");
 
-      if (giorno.M && giorno.M.length > 0) {
-        giornoDiv.innerHTML += `
-          <div><b>M:</b> ${renderTurno(giorno.M, giorno.data_iso, "M")}</div>
-        `;
+      const titolo = `${giorno.data.toLowerCase()} ${turno === "M" ? "mattina" : "pomeriggio"}`;
+      let html = `<strong>${titolo}</strong><div>`;
+
+      adesioni.forEach((utente, i) => {
+        const colore = i === 2 ? "colore-terzo" : i < 2 ? "colore-primi" : "";
+        html += `<span class="${colore}">${utente}</span>`;
+        if (utente === window.username) {
+          html += `<button onclick="rimuoviTurno('${giorno.data_iso}', '${turno}')" class="btn-rimuovi">✖</button>`;
+        }
+        html += " ";
+      });
+
+      if (!adesioni.includes(window.username) && adesioni.length < 3) {
+        html += `<button onclick="aderisciTurno('${giorno.data_iso}', '${turno}')" class="btn-aderisci">aderisci</button>`;
       }
 
-      if (giorno.P && giorno.P.length > 0) {
-        giornoDiv.innerHTML += `
-          <div><b>P:</b> ${renderTurno(giorno.P, giorno.data_iso, "P")}</div>
-        `;
+      html += "</div>";
+      div.innerHTML = html;
+
+      if (adesioni.length === 3) {
+        bloccoCompleti.appendChild(div);
+      } else {
+        bloccoIncompleti.appendChild(div);
       }
-
-      contenitore.appendChild(giornoDiv);
-    }
-  }
-}
-
-// --- FORMATTA UTENTI CON RIMOZIONE / ADESIONE ---
-function renderTurno(lista, dataISO, turno) {
-  let html = "";
-
-  lista.forEach((utente, index) => {
-    const colorClass = index === 2 ? "colore-terzo" : index < 2 ? "colore-primi" : "";
-    html += `<span class="${colorClass}">${utente}</span>`;
-
-    if (utente === window.username) {
-      html += `
-        <button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>
-      `;
-    }
-
-    html += " ";
-  });
-
-  // Mostra "aderisci" se utente non è presente e ci sono meno di 3
-  if (!lista.includes(window.username) && lista.length < 3) {
-    html += `
-      <button onclick="aderisciTurno('${dataISO}', '${turno}')" class="btn-aderisci">aderisci</button>
-    `;
+    });
   }
 
-  return html;
+  contenitore.appendChild(bloccoCompleti);
+  contenitore.appendChild(bloccoIncompleti);
 }
 
 // --- RIMUOVI TURNO UTENTE ---
