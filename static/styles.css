@@ -10,7 +10,7 @@ body {
   background-color: #f4f4f4;
   color: #333;
   min-height: 100vh;
-  padding-bottom: 70px;
+  padding-bottom: 200px;
 }
 
 /* Header */
@@ -130,7 +130,9 @@ form.login-form button:hover {
 }
 
 /* Conteggio disponibilità */
-.conteggio {
+.contatoreSelezioni {
+  text-align:center;
+  margin-top: 0.5rem;
   font-size: 0.9rem;
   color: #666;
 }
@@ -197,9 +199,6 @@ form.login-form button:hover {
   }
 }
 
-.
-text-align:center; 
-margin-top: 0.5rem;
 
 /* Titolo settimana */
 #titoloSettimana {
