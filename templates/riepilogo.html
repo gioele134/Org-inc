@@ -18,48 +18,41 @@
     </nav>
   </header>
 
-  <main role="main">
+  <main>
+    <!-- Intestazione della settimana -->
+    <div id="titoloSettimana" class="titolo-settimana"></div>
+
     <!-- Turni al completo -->
-    <section id="turniCompleti" class="riepilogo">
+    <section>
       <h3>Turni al completo</h3>
-      <!-- Popolata da JS -->
+      <div id="turniCompleti" class="riepilogo"></div>
     </section>
 
-    <!-- Filtro turni parziali -->
-    <section class="riepilogo">
+    <!-- Turni parziali -->
+    <section>
       <h3>Turni parziali</h3>
-      <label for="filtroParziali">Visualizza:</label>
-      <select id="filtroParziali">
+      <label for="filtroTurniIncompleti">Visualizza:</label>
+      <select id="filtroTurniIncompleti">
         <option value="2">Turni con 2 adesioni</option>
         <option value="1">Turni con 1 adesione</option>
+        <option value="tutti" selected>Tutti</option>
       </select>
-      <div id="turniParziali"></div>
-    </section>
-
-    <!-- Riepilogo generale settimanale -->
-    <section class="riepilogo">
-      <h3 id="titoloSettimana"></h3>
-      <div id="settimaneContainer"></div>
+      <div id="turniIncompleti" class="riepilogo"></div>
     </section>
   </main>
 
-  <!-- Barra di controllo -->
   <div class="barra-controllo">
     <button id="prevSettimana">← Settimana precedente</button>
     <button id="nextSettimana">Settimana successiva →</button>
   </div>
 
-  <!-- Toast -->
   <div id="toast" class="toast">Turno aggiornato</div>
 
-  <!-- Variabili JS globali -->
   <script>
     window.SUPABASE_URL = "{{ supabase_url }}";
     window.SUPABASE_KEY = "{{ supabase_key }}";
     window.username = "{{ username }}";
   </script>
-
-  <!-- JS -->
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
