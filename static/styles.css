@@ -116,6 +116,7 @@ form.login-form button:hover {
   border: 1px solid #888;
   background: #eee;
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, border 0.2s ease;
 }
 
 .turno-btn:hover:not(:disabled) {
