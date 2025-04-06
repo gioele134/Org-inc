@@ -42,21 +42,32 @@ def calendario():
         return redirect(url_for("login"))
     return render_template("calendario.html", username=session["username"])
 
-# --- Dati per il frontend (calendar.js) ---
+# --- Riepilogo ---
+@app.route("/riepilogo")
+def riepilogo():
+    if "username" not in session:
+        return redirect(url_for("login"))
+    return render_template(
+        "riepilogo.html",
+        username=session["username"],
+        supabase_url=os.environ["SUPABASE_URL"],
+        supabase_key=os.environ["SUPABASE_KEY"]
+    )
+
+# --- API: dati per il calendario ---
 @app.route("/dati_disponibilita_turni")
 def dati_disponibilita_turni():
     if "username" not in session:
         return jsonify({})
-
     username = session["username"]
 
-    # Turni confermati dell’utente
+    # Recupera confermate
     confermate = {}
     res = supabase.table("disponibilita").select("data, turno").eq("utente", username).execute()
     for r in res.data:
         confermate[r["data"]] = r["turno"]
 
-    # Conteggi totali per ogni data e turno
+    # Totali per giorno/turno
     tutte = {}
     res = supabase.table("disponibilita").select("data, turno").execute()
     for r in res.data:
@@ -71,12 +82,11 @@ def dati_disponibilita_turni():
         "tutte": tutte
     })
 
-# --- Aggiorna disponibilità (POST da calendar.js) ---
+# --- API: aggiorna disponibilità ---
 @app.route("/aggiorna_disponibilita_turni", methods=["POST"])
 def aggiorna_disponibilita_turni():
     if "username" not in session:
         return "Non autorizzato", 403
-
     username = session["username"]
     selezioni = request.json.get("selezioni", [])
 
@@ -88,17 +98,17 @@ def aggiorna_disponibilita_turni():
         supabase.table("disponibilita").insert({
             "utente": username,
             "data": data,
-            "turno": turno
+            "turno": turno,
+            "inserito_il": datetime.utcnow().isoformat()
         }).execute()
 
     return "", 204
 
-# --- Rimuovi disponibilità (POST da riepilogo) ---
+# --- API: rimuovi turno ---
 @app.route("/rimuovi_disponibilita", methods=["POST"])
 def rimuovi_disponibilita():
     if "username" not in session:
         return "Non autorizzato", 403
-
     username = session["username"]
     data = request.form.get("data")
     turno = request.form.get("turno")
@@ -110,12 +120,11 @@ def rimuovi_disponibilita():
 
     return redirect(url_for("riepilogo"))
 
-# --- Aderisci a un turno dal riepilogo (JS) ---
+# --- API: aderire a turno da riepilogo ---
 @app.route("/aderisci_turno", methods=["POST"])
 def aderisci_turno():
     if "username" not in session:
         return "Non autorizzato", 403
-
     username = session["username"]
     data = request.json.get("data")
     turno = request.json.get("turno")
@@ -123,73 +132,20 @@ def aderisci_turno():
     if not data or not turno:
         return "Dati mancanti", 400
 
-    # Rimuove precedenti disponibilità per quel giorno
+    # Rimuove precedenti per quella data
     supabase.table("disponibilita").delete().eq("utente", username).eq("data", data).execute()
 
-    # Inserisce nuova disponibilità
+    # Inserisce nuovo turno
     supabase.table("disponibilita").insert({
         "utente": username,
         "data": data,
-        "turno": turno
+        "turno": turno,
+        "inserito_il": datetime.utcnow().isoformat()
     }).execute()
 
     return "", 204
 
-# --- Helper per turni nel riepilogo ---
-def utenti_per_turno(disponibilita, data_str, turno):
-    return [r["utente"] for r in disponibilita if r["data"] == data_str and r["turno"] == turno]
-
-# --- Riepilogo (pagina) ---
-@app.route("/riepilogo")
-def riepilogo():
-    if "username" not in session:
-        return redirect(url_for("login"))
-
-    oggi = datetime.today()
-    lunedi_corrente = oggi - timedelta(days=oggi.weekday())
-    settimane = []
-
-    # Recupera tutte le disponibilità
-    res = supabase.table("disponibilita").select("*").execute()
-    disponibilita = res.data if res.data else []
-
-    for i in range(0, 6):  # settimana attuale + 5
-        lunedi = lunedi_corrente + timedelta(weeks=i)
-        domenica = lunedi + timedelta(days=6)
-        settimana_data = {
-            "numero": lunedi.isocalendar()[1],
-            "inizio": lunedi.strftime("%d/%m/%Y"),
-            "fine": domenica.strftime("%d/%m/%Y"),
-            "giorni": []
-        }
-
-        giorni_it = ["LUNEDÌ", "MARTEDÌ", "MERCOLEDÌ", "GIOVEDÌ", "VENERDÌ", "SABATO"]
-        for offset in range(6):
-            giorno = lunedi + timedelta(days=offset)
-            data_str = giorno.strftime("%Y-%m-%d")
-            giorno_label = f"{giorni_it[offset]} {giorno.strftime('%d')}"
-
-            m = utenti_per_turno(disponibilita, data_str, "M")
-            p = utenti_per_turno(disponibilita, data_str, "P")
-
-            settimana_data["giorni"].append({
-                "data": giorno_label,
-                "data_iso": data_str,
-                "M": m,
-                "P": p
-            })
-
-        settimane.append(settimana_data)
-
-    return render_template(
-        "riepilogo.html",
-        settimane=settimane,
-        username=session["username"],
-        supabase_url=SUPABASE_URL,
-        supabase_key=SUPABASE_KEY
-    )
-
-# --- Avvio ---
+# --- Avvio app ---
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
