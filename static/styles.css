@@ -288,12 +288,14 @@ form.login-form button:hover {
 }
 
 .turno-badge .icon {
+  font-size: 0.7rem;
   font-weight: bold;
-}
-
-.turno-badge .timestamp {
-  font-size: 0.75rem;
-  color: #555;
+  padding: 2px 6px;
+  border-radius: 8px;
+  background-color: currentColor;
+  color: white;
+  text-transform: uppercase;
+  line-height: 1;
 }
 
 /* Bottone aderisci */
