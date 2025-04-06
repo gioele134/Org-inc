@@ -99,7 +99,7 @@ def aggiorna_disponibilita_turni():
             "utente": username,
             "data": data,
             "turno": turno,
-            "inserito_il": datetime.utcnow().isoformat()
+            "created_at": datetime.utcnow().isoformat()
         }).execute()
 
     return "", 204
@@ -140,7 +140,7 @@ def aderisci_turno():
         "utente": username,
         "data": data,
         "turno": turno,
-        "inserito_il": datetime.utcnow().isoformat()
+        "created_at": datetime.utcnow().isoformat()
     }).execute()
 
     return "", 204
