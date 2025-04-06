@@ -4,6 +4,7 @@ const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABA
 // --- VARIABILI GLOBALI ---
 let settimanaCorrente = 0;
 let settimane = [];
+let filtroAttivo = null; // "1" oppure "2" oppure null
 
 // --- DOM READY ---
 document.addEventListener("DOMContentLoaded", async () => {
@@ -55,26 +56,32 @@ function aggiornaSettimana() {
   for (const giorno of Object.values(settimana.giorni)) {
     ["M", "P"].forEach(turno => {
       const lista = giorno[turno] || [];
+      if (lista.length === 0) return;
+
       const label = `${giorno.data.toLowerCase()} ${turno === "M" ? "mattina" : "pomeriggio"}`;
 
+      const turnoObj = {
+        label,
+        utenti: lista,
+        data: giorno.data_iso,
+        turno,
+        count: lista.length
+      };
+
       if (lista.length === 3) {
-        turniCompleti.push({
-          label,
-          utenti: lista,
-          data: giorno.data_iso,
-          turno
-        });
-      } else if (lista.length > 0) {
-        turniIncompleti.push({
-          label,
-          utenti: lista,
-          data: giorno.data_iso,
-          turno
-        });
+        turniCompleti.push(turnoObj);
+      } else {
+        turniIncompleti.push(turnoObj);
       }
     });
   }
 
+  // Titolo settimana
+  const titoloSett = document.createElement("h3");
+  titoloSett.textContent = `Settimana ${settimana.numero}`;
+  contenitore.appendChild(titoloSett);
+
+  // Turni completi
   if (turniCompleti.length > 0) {
     const titolo = document.createElement("h3");
     titolo.textContent = "Turni al completo";
@@ -91,20 +98,35 @@ function aggiornaSettimana() {
     });
   }
 
+  // Turni incompleti con filtro
   if (turniIncompleti.length > 0) {
     const titolo = document.createElement("h3");
     titolo.textContent = "Turni incompleti";
     contenitore.appendChild(titolo);
 
-    turniIncompleti.forEach(turno => {
-      const div = document.createElement("div");
-      div.classList.add("giorno-riepilogo");
-      div.innerHTML = `
-        <strong>${turno.label}</strong>
-        <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
-      `;
-      contenitore.appendChild(div);
-    });
+    turniIncompleti
+      .filter(t => filtroAttivo === null || String(t.count) === filtroAttivo)
+      .forEach(turno => {
+        const div = document.createElement("div");
+        div.classList.add("giorno-riepilogo");
+        div.innerHTML = `
+          <strong>${turno.label}</strong>
+          <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
+        `;
+        contenitore.appendChild(div);
+      });
+
+    // Pulsanti filtro
+    const filtriDiv = document.createElement("div");
+    filtriDiv.classList.add("filtro-turni");
+
+    filtriDiv.innerHTML = `
+      <button onclick="applicaFiltro('1')" ${filtroAttivo === '1' ? 'disabled' : ''}>Turni con 1 adesione</button>
+      <button onclick="applicaFiltro('2')" ${filtroAttivo === '2' ? 'disabled' : ''}>Turni con 2 adesioni</button>
+      <button onclick="applicaFiltro(null)" ${filtroAttivo === null ? 'disabled' : ''}>Tutti</button>
+    `;
+
+    contenitore.appendChild(filtriDiv);
   }
 }
 
@@ -162,6 +184,12 @@ async function aderisciTurno(data, turno) {
     settimane = organizzaPerSettimane(aggiornata);
     aggiornaSettimana();
   }
+}
+
+// --- FILTRO ---
+function applicaFiltro(valore) {
+  filtroAttivo = valore;
+  aggiornaSettimana();
 }
 
 // --- ORGANIZZAZIONE DATI ---
