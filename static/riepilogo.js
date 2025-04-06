@@ -29,7 +29,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("prevSettimana").addEventListener("click", () => cambiaSettimana(-1));
   document.getElementById("nextSettimana").addEventListener("click", () => cambiaSettimana(1));
-  document.getElementById("filtroIncompleti").addEventListener("change", aggiornaSettimana);
 });
 
 // --- CAMBIO SETTIMANA ---
@@ -56,7 +55,6 @@ function aggiornaSettimana() {
     return;
   }
 
-  // Titolo settimana
   const titolo = document.createElement("h3");
   titolo.id = "titoloSettimana";
   titolo.textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
@@ -69,16 +67,15 @@ function aggiornaSettimana() {
     ["M", "P"].forEach(turno => {
       const lista = giorno[turno] || [];
       const label = `${giorno.data.toLowerCase()} ${turno === "M" ? "mattina" : "pomeriggio"}`;
-
-      if (lista.length === 3) {
+      if (lista.length >= 2) {
         turniCompleti.push({ label, utenti: lista, data: giorno.data_iso, turno });
-      } else if (lista.length > 0) {
+      } else if (lista.length === 1) {
         turniIncompleti.push({ label, utenti: lista, data: giorno.data_iso, turno });
       }
     });
   }
 
-  // --- RENDER TURNI COMPLETI ---
+  // --- TURNI COMPLETI (2 o 3 adesioni) ---
   if (turniCompleti.length > 0) {
     const titoloCompleti = document.createElement("h2");
     titoloCompleti.textContent = "Turni al Completo";
@@ -86,7 +83,7 @@ function aggiornaSettimana() {
 
     turniCompleti.forEach(turno => {
       const div = document.createElement("div");
-      div.classList.add("giorno-riepilogo");
+      div.classList.add("giorno-riepilogo", "turno-completo");
       div.innerHTML = `
         <strong>${turno.label}</strong>
         <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
@@ -99,20 +96,13 @@ function aggiornaSettimana() {
     sezioneCompleti.appendChild(avviso);
   }
 
-  // --- RENDER TURNI INCOMPLETI ---
-  const filtro = document.getElementById("filtroIncompleti").value;
-  const daMostrare = turniIncompleti.filter(turno =>
-    filtro === "tutti" ||
-    (filtro === "uno" && turno.utenti.length === 1) ||
-    (filtro === "due" && turno.utenti.length === 2)
-  );
-
-  if (daMostrare.length > 0) {
+  // --- TURNI INCOMPLETI (1 adesione) ---
+  if (turniIncompleti.length > 0) {
     const titoloIncompleti = document.createElement("h4");
     titoloIncompleti.textContent = "Turni incompleti";
     contenitore.appendChild(titoloIncompleti);
 
-    daMostrare.forEach(turno => {
+    turniIncompleti.forEach(turno => {
       const div = document.createElement("div");
       div.classList.add("giorno-riepilogo");
       div.innerHTML = `
@@ -128,18 +118,22 @@ function aggiornaSettimana() {
   }
 }
 
-// --- FORMATTA UTENTI CON RIMOZIONE / ADESIONE ---
+// --- FORMATTA UTENTI ---
 function renderTurno(lista, dataISO, turno) {
   let html = "";
 
   lista.forEach((utente, index) => {
     const colorClass = index === 2 ? "blue" : index < 2 ? "green" : "grey";
+    const ruolo = index < 2 ? "Titolare" : "Riserva";
     const ora = window.timestampMap?.[dataISO]?.[turno]?.[utente] || "";
     const orario = ora ? ` <small>${formatDateTime(ora)}</small>` : "";
+
     html += `
       <div class="riga-turno">
-        <span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}${orario}</span>
-        ${utente === window.username ? `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">Rimuovi la tua disponibilità</button>` : ""}
+        <span class="turno-badge ${colorClass}">
+          <span class="icon">●</span> ${utente} <span class="ruolo">${ruolo}</span>${orario}
+        </span>
+        ${utente === window.username ? `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">Rimuovi</button>` : ""}
       </div>
     `;
   });
@@ -156,7 +150,7 @@ function formatDateTime(timestamp) {
   return `${date.toLocaleDateString("it-IT")} ${date.toLocaleTimeString("it-IT", { hour: '2-digit', minute: '2-digit' })}`;
 }
 
-// --- RIMUOVI TURNO UTENTE ---
+// --- RIMUOVI TURNO ---
 async function rimuoviTurno(data, turno) {
   const { error } = await supabase
     .from("disponibilita")
@@ -193,7 +187,7 @@ async function aderisciTurno(data, turno) {
   }
 }
 
-// --- ORGANIZZAZIONE DATI ---
+// --- ORGANIZZA PER SETTIMANE ---
 function organizzaPerSettimane(disponibilita) {
   const settimaneMap = new Map();
   const timestamps = {};
@@ -232,7 +226,7 @@ function organizzaPerSettimane(disponibilita) {
   return Array.from(settimaneMap.values()).sort((a, b) => a.numero - b.numero);
 }
 
-// --- UTILS SETTIMANA ---
+// --- UTILS ---
 function getMonday(date) {
   const d = new Date(date);
   const day = d.getDay();
