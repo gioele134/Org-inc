@@ -10,7 +10,7 @@ body {
   background-color: #f4f4f4;
   color: #333;
   min-height: 100vh;
-  padding-bottom: 200px;
+  padding-bottom: 70px;
 }
 
 /* Header */
@@ -130,9 +130,7 @@ form.login-form button:hover {
 }
 
 /* Conteggio disponibilità */
-.contatoreSelezioni {
-  text-align:center;
-  margin-top: 0.5rem;
+.conteggio {
   font-size: 0.9rem;
   color: #666;
 }
@@ -199,7 +197,6 @@ form.login-form button:hover {
   }
 }
 
-
 /* Titolo settimana */
 #titoloSettimana {
   font-size: 1rem;
@@ -238,17 +235,16 @@ form.login-form button:hover {
   font-size: 0.9rem;
   margin: 0.2rem 0;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 6px;
-  flex-wrap: wrap;
 }
 
 /* Badge utente */
 .turno-badge {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.4rem;
-  margin: 0.2rem 0.4rem 0.2rem 0;
+  justify-content: space-between;
+  gap: 0.8rem;
   padding: 0.3rem 0.6rem;
   border-radius: 999px;
   font-size: 0.85rem;
@@ -280,12 +276,9 @@ form.login-form button:hover {
   font-weight: bold;
 }
 
-/* Data e ora accanto al nome */
 .turno-badge .timestamp {
   font-size: 0.75rem;
-  color: #666;
-  margin-left: 4px;
-  font-weight: normal;
+  color: #555;
 }
 
 /* Bottone aderisci */
@@ -345,9 +338,4 @@ form.login-form button:hover {
 .filtro-turni button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
-}
-
-.turno-badge small {
-  font-size: 0.75rem;
-  color: #666;
 }
