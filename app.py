@@ -15,7 +15,9 @@ app.secret_key = os.environ["FLASK_SECRET"]
 # --- Utenti autorizzati ---
 UTENTI = {
     "gioele": "1234",
-    "admin": "adminpass"
+    "admin": "adminpass",
+    "ciao": "ciao",
+    "1234": "gioele"
 }
 
 # --- Login ---
