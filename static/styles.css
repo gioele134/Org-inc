@@ -68,7 +68,7 @@ form.login-form button:hover {
 }
 
 /* Contenitori principali */
-#griglia, .riepilogo {
+#griglia, .riepilogo .turni-ricevuti {
   display: grid;
   gap: 0.5rem;
   padding: 1rem;
