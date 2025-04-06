@@ -46,9 +46,13 @@ function aggiornaSettimana() {
   const contenitore = document.getElementById("settimaneContainer");
   contenitore.innerHTML = "";
 
+  const sezioneCompleti = document.getElementById("turni-completi");
+  sezioneCompleti.innerHTML = "";
+
   const settimana = settimane[settimanaCorrente];
   if (!settimana) {
     contenitore.innerHTML = "<p>Nessuna disponibilità per questa settimana.</p>";
+    sezioneCompleti.innerHTML = "<p>Nessun turno è al completo</p>";
     return;
   }
 
@@ -74,10 +78,11 @@ function aggiornaSettimana() {
     });
   }
 
+  // --- RENDER TURNI COMPLETI ---
   if (turniCompleti.length > 0) {
-    const titoloCompleti = document.createElement("h4");
-    titoloCompleti.textContent = "Turni al completo";
-    contenitore.appendChild(titoloCompleti);
+    const titoloCompleti = document.createElement("h2");
+    titoloCompleti.textContent = "Turni al Completo";
+    sezioneCompleti.appendChild(titoloCompleti);
 
     turniCompleti.forEach(turno => {
       const div = document.createElement("div");
@@ -86,10 +91,15 @@ function aggiornaSettimana() {
         <strong>${turno.label}</strong>
         <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
       `;
-      contenitore.appendChild(div);
+      sezioneCompleti.appendChild(div);
     });
+  } else {
+    const avviso = document.createElement("p");
+    avviso.textContent = "Nessun turno è al completo";
+    sezioneCompleti.appendChild(avviso);
   }
 
+  // --- RENDER TURNI INCOMPLETI ---
   const filtro = document.getElementById("filtroIncompleti").value;
   const daMostrare = turniIncompleti.filter(turno =>
     filtro === "tutti" ||
