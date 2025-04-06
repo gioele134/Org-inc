@@ -23,6 +23,7 @@ header {
 
 header h2 {
   margin-bottom: 0.5rem;
+  justify-content: center;
 }
 
 nav a {
@@ -67,7 +68,7 @@ form.login-form button:hover {
 }
 
 /* Contenitori principali */
-#griglia, .riepilogo {
+#griglia, .riepilogo .turno-completo {
   display: grid;
   gap: 0.5rem;
   padding: 1rem;
