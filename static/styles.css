@@ -36,7 +36,7 @@ nav a:hover {
   text-decoration: underline;
 }
 
-/* Login page */
+/* Login */
 form.login-form {
   max-width: 320px;
   margin: 4rem auto;
@@ -66,14 +66,19 @@ form.login-form button:hover {
   background-color: #007d82;
 }
 
-/* Calendario / Riepilogo */
+/* Contenitori principali */
 #griglia, .riepilogo {
   display: grid;
   gap: 0.5rem;
   padding: 1rem;
+  max-width: 420px;
+  margin: 2rem auto;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
 }
 
-/* Giorni calendario */
+/* Giorni del calendario */
 .giorno {
   background: white;
   border: 1px solid #ccc;
@@ -93,13 +98,12 @@ form.login-form button:hover {
   border-radius: 8px;
 }
 
-/* Etichetta giorno */
 .etichetta {
   font-weight: bold;
   margin-bottom: 0.5rem;
 }
 
-/* Bottoni M/P */
+/* Turni */
 .turni {
   margin-bottom: 0.5rem;
 }
@@ -123,16 +127,15 @@ form.login-form button:hover {
   color: #fff !important;
   border: 2px solid #006400;
   font-weight: bold;
-  transition: background-color 0.2s ease;
 }
 
-/* Conteggio */
+/* Conteggio disponibilità */
 .conteggio {
   font-size: 0.9rem;
   color: #666;
 }
 
-/* Barra di controllo fissa in basso */
+/* Barra di controllo fissa */
 .barra-controllo {
   position: fixed;
   bottom: 0;
@@ -156,7 +159,6 @@ form.login-form button:hover {
   background-color: #0a9396;
   color: white;
   font-weight: bold;
-  transition: background 0.2s ease;
 }
 
 .barra-controllo button:hover {
@@ -195,18 +197,7 @@ form.login-form button:hover {
   }
 }
 
-/* Contenitore principale del riepilogo */
-.riepilogo {
-  max-width: 420px;
-  margin: 2rem auto;
-  padding: 1rem;
-  font-family: sans-serif;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-}
-
-/* Titolo della settimana */
+/* Titolo settimana */
 #titoloSettimana {
   font-size: 1rem;
   font-weight: bold;
@@ -215,7 +206,7 @@ form.login-form button:hover {
   color: #0077cc;
 }
 
-/* Ogni giorno nel riepilogo */
+/* Giorni nel riepilogo */
 .giorno-riepilogo {
   padding: 0.6rem 0.8rem;
   border: 1px solid #ddd;
@@ -224,7 +215,7 @@ form.login-form button:hover {
   background-color: #f9f9f9;
 }
 
-/* Turni al completo */
+/* Turni completi */
 .turno-completo {
   background-color: #e6f0ff;
   border-left: 5px solid #0077cc;
@@ -239,71 +230,47 @@ form.login-form button:hover {
   margin-bottom: 0.4rem;
 }
 
-/* Dettagli dei turni */
+/* Dettagli turni */
 .giorno-riepilogo div {
   font-size: 0.9rem;
   margin: 0.2rem 0;
   display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
-/* Utenti evidenziati */
-.utente-verde {
-  color: #2e7d32;
-  font-weight: bold;
-}
-
-.utente-blu {
-  color: #0d6efd;
-  font-weight: bold;
-}
-
-/* Bottoni per la rimozione dei turni */
-.btn-rimuovi {
-  background-color: rgba(220, 53, 69, 0.8);
-  color: white;
-  border: none;
-  border-radius: 4px;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.85rem;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.btn-rimuovi:hover {
-  background-color: rgba(200, 30, 50, 0.9);
-}
-
-/* Sezione riepilogo con badge */
+/* Badge utente */
 .turno-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
   margin: 0.2rem 0.4rem 0.2rem 0;
   padding: 0.3rem 0.6rem;
-  background-color: #e0f7f6;
   border-radius: 999px;
   font-size: 0.85rem;
   font-weight: 500;
+  border: 1px solid #bbb;
+  background-color: #eee;
+  color: #333;
 }
 
 .turno-badge.green {
   background-color: rgba(0, 128, 0, 0.1);
   color: green;
-  border: 1px solid green;
+  border-color: green;
 }
 
 .turno-badge.blue {
   background-color: rgba(0, 0, 255, 0.1);
   color: #0040ff;
-  border: 1px solid #0040ff;
+  border-color: #0040ff;
 }
 
 .turno-badge.grey {
   background-color: #eee;
   color: #333;
-  border: 1px solid #bbb;
+  border-color: #bbb;
 }
 
 .turno-badge .icon {
@@ -319,7 +286,6 @@ form.login-form button:hover {
   padding: 0.3rem 0.8rem;
   font-size: 0.8rem;
   cursor: pointer;
-  transition: background 0.2s ease;
   margin-left: 0.6rem;
 }
 
@@ -327,7 +293,23 @@ form.login-form button:hover {
   background-color: #007d82;
 }
 
-/* --- FILTRO TURNI INCOMPLETI --- */
+/* Bottone rimuovi */
+.btn-rimuovi {
+  background-color: rgba(220, 53, 69, 0.8);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.btn-rimuovi:hover {
+  background-color: rgba(200, 30, 50, 0.9);
+}
+
+/* Filtro turni incompleti */
 .filtro-turni {
   display: flex;
   justify-content: center;
@@ -343,7 +325,6 @@ form.login-form button:hover {
   background-color: #f0f0f0;
   cursor: pointer;
   font-weight: bold;
-  transition: background 0.2s ease;
 }
 
 .filtro-turni button:hover:not(:disabled) {
@@ -353,5 +334,4 @@ form.login-form button:hover {
 .filtro-turni button:disabled {
   background-color: #ccc;
   cursor: not-allowed;
-  font-weight: bold;
 }
