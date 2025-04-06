@@ -19,24 +19,7 @@
   </header>
 
   <main>
-    <div class="riepilogo">
-      <div id="titoloSettimana"></div>
-
-      <h3>Turni al completo</h3>
-      <div id="turniCompleti" class="sezione-turni"></div>
-
-      <h3>Turni incompleti</h3>
-      <div id="turniIncompleti" class="sezione-turni"></div>
-
-      <div class="filtro-turni">
-        <label for="filtroAdesioni">Mostra solo turni con:</label>
-        <select id="filtroAdesioni">
-          <option value="tutti">Tutte le adesioni</option>
-          <option value="1">1 adesione</option>
-          <option value="2">2 adesioni</option>
-        </select>
-      </div>
-    </div>
+    <div id="settimaneContainer" class="riepilogo"></div>
   </main>
 
   <div class="barra-controllo">
@@ -45,7 +28,15 @@
     <button id="nextSettimana">Settimana successiva →</button>
   </div>
 
-  <div id="toast" class="toast">Operazione completata</div>
+  <div class="filtro-turni">
+    <select id="filtroIncompleti">
+      <option value="tutti">Tutti</option>
+      <option value="uno">Solo 1 adesione</option>
+      <option value="due">Solo 2 adesioni</option>
+    </select>
+  </div>
+
+  <div id="toast" class="toast">Turno rimosso</div>
 
   <script>
     window.SUPABASE_URL = "{{ supabase_url }}";
