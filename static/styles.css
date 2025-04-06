@@ -149,7 +149,7 @@ form.login-form button:hover {
 
 .barra-controllo .bottoni-navigazione {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.3rem;
@@ -166,8 +166,6 @@ form.login-form button:hover {
   font-weight: bold;
   flex: 1;
   text-align: center;
-  margin-left: 50%;
-  margin-right: 50%;
 }
 
 .barra-controllo button:hover {
