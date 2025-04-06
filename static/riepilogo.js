@@ -50,37 +50,55 @@ function aggiornaSettimana() {
   document.getElementById("titoloSettimana").textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
 
   for (const giorno of Object.values(settimana.giorni)) {
-    // Salta completamente i giorni senza disponibilità
-    if ((!giorno.M || giorno.M.length === 0) && (!giorno.P || giorno.P.length === 0)) continue;
-
     const giornoDiv = document.createElement("div");
     giornoDiv.classList.add("giorno-riepilogo");
 
-    let html = `<strong>${giorno.data}</strong>`;
+    // Mostra solo i turni che hanno almeno una adesione
+    if ((giorno.M && giorno.M.length > 0) || (giorno.P && giorno.P.length > 0)) {
+      giornoDiv.innerHTML = `<strong>${giorno.data}</strong>`;
 
-    if (giorno.M && giorno.M.length > 0) {
-      html += `<div><b>M:</b> ${renderTurno(giorno.M, giorno.data_iso, "M")}</div>`;
-    }
-    if (giorno.P && giorno.P.length > 0) {
-      html += `<div><b>P:</b> ${renderTurno(giorno.P, giorno.data_iso, "P")}</div>`;
-    }
+      if (giorno.M && giorno.M.length > 0) {
+        giornoDiv.innerHTML += `
+          <div><b>M:</b> ${renderTurno(giorno.M, giorno.data_iso, "M")}</div>
+        `;
+      }
 
-    giornoDiv.innerHTML = html;
-    contenitore.appendChild(giornoDiv);
+      if (giorno.P && giorno.P.length > 0) {
+        giornoDiv.innerHTML += `
+          <div><b>P:</b> ${renderTurno(giorno.P, giorno.data_iso, "P")}</div>
+        `;
+      }
+
+      contenitore.appendChild(giornoDiv);
+    }
   }
 }
 
-// --- FORMATTA UTENTI CON RIMOZIONE ---
+// --- FORMATTA UTENTI CON RIMOZIONE / ADESIONE ---
 function renderTurno(lista, dataISO, turno) {
-  return lista.map(utente => {
+  let html = "";
+
+  lista.forEach((utente, index) => {
+    const colorClass = index === 2 ? "colore-terzo" : index < 2 ? "colore-primi" : "";
+    html += `<span class="${colorClass}">${utente}</span>`;
+
     if (utente === window.username) {
-      return `
-        ${utente}
+      html += `
         <button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>
       `;
     }
-    return utente;
-  }).join(", ");
+
+    html += " ";
+  });
+
+  // Mostra "aderisci" se utente non è presente e ci sono meno di 3
+  if (!lista.includes(window.username) && lista.length < 3) {
+    html += `
+      <button onclick="aderisciTurno('${dataISO}', '${turno}')" class="btn-aderisci">aderisci</button>
+    `;
+  }
+
+  return html;
 }
 
 // --- RIMUOVI TURNO UTENTE ---
@@ -94,6 +112,20 @@ async function rimuoviTurno(data, turno) {
 
   if (!error) {
     mostraToast("Turno rimosso");
+    const { data: aggiornata } = await supabase.from("disponibilita").select("*");
+    settimane = organizzaPerSettimane(aggiornata);
+    aggiornaSettimana();
+  }
+}
+
+// --- ADERISCI TURNO ---
+async function aderisciTurno(data, turno) {
+  const { error } = await supabase
+    .from("disponibilita")
+    .insert([{ data: data, turno: turno, utente: window.username }]);
+
+  if (!error) {
+    mostraToast("Aderito al turno");
     const { data: aggiornata } = await supabase.from("disponibilita").select("*");
     settimane = organizzaPerSettimane(aggiornata);
     aggiornaSettimana();
