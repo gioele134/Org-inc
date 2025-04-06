@@ -1,8 +1,11 @@
+// --- CONFIGURAZIONE SUPABASE ---
 const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
 
+// --- VARIABILI GLOBALI ---
 let settimanaCorrente = 0;
 let settimane = [];
 
+// --- DOM READY ---
 document.addEventListener("DOMContentLoaded", async () => {
   const container = document.getElementById("settimaneContainer");
 
@@ -24,6 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("nextSettimana").addEventListener("click", () => cambiaSettimana(1));
 });
 
+// --- CAMBIO SETTIMANA ---
 function cambiaSettimana(delta) {
   const nuova = settimanaCorrente + delta;
   if (nuova >= 0 && nuova < settimane.length) {
@@ -32,6 +36,7 @@ function cambiaSettimana(delta) {
   }
 }
 
+// --- AGGIORNA SETTIMANA ---
 function aggiornaSettimana() {
   const contenitore = document.getElementById("settimaneContainer");
   contenitore.innerHTML = "";
@@ -44,46 +49,29 @@ function aggiornaSettimana() {
 
   document.getElementById("titoloSettimana").textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
 
-  const sezioneCompleti = document.createElement("div");
-  sezioneCompleti.classList.add("turni-completi");
-  const titolo = document.createElement("h3");
-  titolo.textContent = "Turni al completo";
-  sezioneCompleti.appendChild(titolo);
-
   for (const giorno of Object.values(settimana.giorni)) {
-    ["M", "P"].forEach(turno => {
-      const lista = giorno[turno];
-      if (lista.length === 3) {
-        const riga = document.createElement("div");
-        riga.classList.add("turno-completo");
-        riga.innerHTML = `
-          <strong>${giorno.data.toLowerCase()} ${turno === "M" ? "mattina" : "pomeriggio"}</strong><br>
-          ${lista.map((nome, idx) => `<span style="color: ${idx === 2 ? 'blue' : 'green'}">${nome}</span>`).join(", ")}
-        `;
-        sezioneCompleti.appendChild(riga);
-      }
-    });
-  }
+    // Salta completamente i giorni senza disponibilità
+    if ((!giorno.M || giorno.M.length === 0) && (!giorno.P || giorno.P.length === 0)) continue;
 
-  contenitore.appendChild(sezioneCompleti);
-
-  for (const giorno of Object.values(settimana.giorni)) {
     const giornoDiv = document.createElement("div");
     giornoDiv.classList.add("giorno-riepilogo");
 
-    giornoDiv.innerHTML = `
-      <strong>${giorno.data}</strong>
-      <div><b>M:</b> ${renderTurno(giorno.M, giorno.data_iso, "M")}</div>
-      <div><b>P:</b> ${renderTurno(giorno.P, giorno.data_iso, "P")}</div>
-    `;
+    let html = `<strong>${giorno.data}</strong>`;
 
+    if (giorno.M && giorno.M.length > 0) {
+      html += `<div><b>M:</b> ${renderTurno(giorno.M, giorno.data_iso, "M")}</div>`;
+    }
+    if (giorno.P && giorno.P.length > 0) {
+      html += `<div><b>P:</b> ${renderTurno(giorno.P, giorno.data_iso, "P")}</div>`;
+    }
+
+    giornoDiv.innerHTML = html;
     contenitore.appendChild(giornoDiv);
   }
 }
 
+// --- FORMATTA UTENTI CON RIMOZIONE ---
 function renderTurno(lista, dataISO, turno) {
-  if (!lista || lista.length === 0) return "";
-
   return lista.map(utente => {
     if (utente === window.username) {
       return `
@@ -95,6 +83,7 @@ function renderTurno(lista, dataISO, turno) {
   }).join(", ");
 }
 
+// --- RIMUOVI TURNO UTENTE ---
 async function rimuoviTurno(data, turno) {
   const { error } = await supabase
     .from("disponibilita")
@@ -111,6 +100,7 @@ async function rimuoviTurno(data, turno) {
   }
 }
 
+// --- ORGANIZZAZIONE DATI ---
 function organizzaPerSettimane(disponibilita) {
   const settimaneMap = new Map();
 
@@ -142,6 +132,7 @@ function organizzaPerSettimane(disponibilita) {
   return Array.from(settimaneMap.values()).sort((a, b) => a.numero - b.numero);
 }
 
+// --- UTILS SETTIMANA ---
 function getMonday(date) {
   const d = new Date(date);
   const day = d.getDay();
@@ -162,6 +153,7 @@ function getSettimana(date) {
   return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
 }
 
+// --- TOAST ---
 function mostraToast(msg) {
   const toast = document.getElementById("toast");
   if (!toast) return;
