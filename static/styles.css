@@ -1,8 +1,8 @@
 /* Reset base */
 * {
   box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+  margin: 0.5rem;
+  padding: 0.5rem;
 }
 
 body {
@@ -147,7 +147,6 @@ form.login-form button:hover {
   padding: 0.7rem 1rem;
   z-index: 1000;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content:center;
 }
