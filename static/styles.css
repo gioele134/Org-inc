@@ -275,21 +275,54 @@ form.login-form button:hover {
   background-color: rgba(200, 30, 50, 0.9);
 }
 
-/* Pulsante "aderisci" */
-.btn-aderisci {
-  background-color: rgba(0, 123, 255, 0.1);
-  border: 1px solid #007bff;
-  color: #007bff;
-  border-radius: 4px;
-  padding: 0.2rem 0.5rem;
+/* Sezione riepilogo con badge */
+.turno-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.2rem 0.4rem 0.2rem 0;
+  padding: 0.3rem 0.6rem;
+  background-color: #e0f7f6;
+  border-radius: 999px;
   font-size: 0.85rem;
-  cursor: pointer;
+  font-weight: 500;
+}
+
+.turno-badge.green {
+  background-color: rgba(0, 128, 0, 0.1);
+  color: green;
+  border: 1px solid green;
+}
+
+.turno-badge.blue {
+  background-color: rgba(0, 0, 255, 0.1);
+  color: #0040ff;
+  border: 1px solid #0040ff;
+}
+
+.turno-badge.grey {
+  background-color: #eee;
+  color: #333;
+  border: 1px solid #bbb;
+}
+
+.turno-badge .icon {
   font-weight: bold;
-  transition: all 0.2s ease;
+}
+
+/* Bottone aderisci */
+.btn-aderisci {
+  background-color: #0a9396;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 0.3rem 0.8rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  margin-left: 0.6rem;
 }
 
 .btn-aderisci:hover {
-  background-color: rgba(0, 123, 255, 0.2);
-  color: #0056b3;
-  border-color: #0056b3;
+  background-color: #007d82;
 }
