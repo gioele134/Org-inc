@@ -19,40 +19,40 @@
   </header>
 
   <main>
-    <!-- Intestazione della settimana -->
-    <div id="titoloSettimana" class="titolo-settimana"></div>
+    <div class="riepilogo">
+      <div id="titoloSettimana"></div>
 
-    <!-- Turni al completo -->
-    <section>
       <h3>Turni al completo</h3>
-      <div id="turniCompleti" class="riepilogo"></div>
-    </section>
+      <div id="turniCompleti" class="sezione-turni"></div>
 
-    <!-- Turni parziali -->
-    <section>
-      <h3>Turni parziali</h3>
-      <label for="filtroTurniIncompleti">Visualizza:</label>
-      <select id="filtroTurniIncompleti">
-        <option value="2">Turni con 2 adesioni</option>
-        <option value="1">Turni con 1 adesione</option>
-        <option value="tutti" selected>Tutti</option>
-      </select>
-      <div id="turniIncompleti" class="riepilogo"></div>
-    </section>
+      <h3>Turni incompleti</h3>
+      <div id="turniIncompleti" class="sezione-turni"></div>
+
+      <div class="filtro-turni">
+        <label for="filtroAdesioni">Mostra solo turni con:</label>
+        <select id="filtroAdesioni">
+          <option value="tutti">Tutte le adesioni</option>
+          <option value="1">1 adesione</option>
+          <option value="2">2 adesioni</option>
+        </select>
+      </div>
+    </div>
   </main>
 
   <div class="barra-controllo">
     <button id="prevSettimana">← Settimana precedente</button>
+    <span id="titoloSettimana"></span>
     <button id="nextSettimana">Settimana successiva →</button>
   </div>
 
-  <div id="toast" class="toast">Turno aggiornato</div>
+  <div id="toast" class="toast">Operazione completata</div>
 
   <script>
     window.SUPABASE_URL = "{{ supabase_url }}";
     window.SUPABASE_KEY = "{{ supabase_key }}";
     window.username = "{{ username }}";
   </script>
+
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
