@@ -277,6 +277,14 @@ form.login-form button:hover {
   font-weight: bold;
 }
 
+/* Data e ora accanto al nome */
+.turno-badge .timestamp {
+  font-size: 0.75rem;
+  color: #666;
+  margin-left: 4px;
+  font-weight: normal;
+}
+
 /* Bottone aderisci */
 .btn-aderisci {
   background-color: #0a9396;
