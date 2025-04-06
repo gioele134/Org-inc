@@ -141,19 +141,25 @@ form.login-form button:hover {
 
 /* Barra di controllo fissa */
 .barra-controllo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem 0.5rem;
+  background-color: white;
   position: fixed;
   bottom: 0;
   left: 0;
-  width: 100%;
-  background: #ffffff;
+  right: 0;
   border-top: 1px solid #ccc;
-  padding: 0.7rem 1rem;
-  z-index: 1000;
+  z-index: 999;
+}
+
+.barra-controllo .bottoni {
   display: flex;
-  align-items: center;
-  justify-content:center;
-  gap: 1rem;
-  margin-bottom: 0.3rem;
+  gap: 0.6rem;
+  flex-wrap: nowrap;
 }
 
 .barra-controllo button {
