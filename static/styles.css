@@ -36,8 +36,38 @@ nav a:hover {
   text-decoration: underline;
 }
 
+/* Login */
+form.login-form {
+  max-width: 320px;
+  margin: 4rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 10px #ccc;
+}
+
+form.login-form input,
+form.login-form button {
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.8rem;
+  font-size: 1rem;
+}
+
+form.login-form button {
+  background-color: #0a9396;
+  color: white;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+form.login-form button:hover {
+  background-color: #007d82;
+}
+
 /* Contenitori principali */
-.riepilogo {
+#griglia, .riepilogo {
   display: grid;
   gap: 0.5rem;
   padding: 1rem;
@@ -46,6 +76,128 @@ nav a:hover {
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+/* Giorni del calendario */
+.giorno {
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.8rem;
+}
+
+.giorno.festivo {
+  background-color: #ffe5e5;
+}
+
+.domenica {
+  background: #ffcccc;
+  padding: 0.8rem;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 8px;
+}
+
+.etichetta {
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+}
+
+/* Turni */
+.turni {
+  margin-bottom: 0.5rem;
+}
+
+.turno-btn {
+  margin-right: 0.5rem;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid #888;
+  background: #eee;
+  cursor: pointer;
+}
+
+.turno-btn:hover:not(:disabled) {
+  background-color: #ddd;
+}
+
+.turno-btn.selezionato {
+  background-color: rgba(0, 128, 0, 0.8);
+  color: #fff;
+  border: 2px solid #006400;
+  font-weight: bold;
+}
+
+/* Conteggio disponibilità */
+.conteggio {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Barra di controllo fissa */
+.barra-controllo {
+  position: fixed;
+  justify-content: center;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border-top: 1px solid #ccc;
+  padding: 0.7rem 1rem;
+  z-index: 1000;
+}
+
+.barra-controllo .bottoni-navigazione {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.3rem;
+}
+
+.barra-controllo button {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  background-color: #0a9396;
+  color: white;
+  font-weight: bold;
+  flex: 1;
+  text-align: center;
+}
+
+.barra-controllo button:hover {
+  background-color: #007d82;
+}
+
+#titoloSettimana {
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 1rem;
+  color: #0077cc;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #198754;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2000;
+}
+
+.toast.show {
+  opacity: 1;
 }
 
 /* Giorni nel riepilogo */
@@ -57,10 +209,13 @@ nav a:hover {
   background-color: #f9f9f9;
 }
 
-.giorno-riepilogo.turno-completo {
+/* Turni completi */
+.turno-completo {
   background-color: #e6f0ff;
+  border-left: 5px solid #0077cc;
 }
 
+/* Etichetta del giorno */
 .giorno-riepilogo strong {
   display: block;
   font-size: 0.95rem;
@@ -69,6 +224,7 @@ nav a:hover {
   margin-bottom: 0.4rem;
 }
 
+/* Dettagli turni */
 .giorno-riepilogo div {
   font-size: 0.9rem;
   margin: 0.2rem 0;
@@ -121,7 +277,7 @@ nav a:hover {
   line-height: 1;
 }
 
-/* Pulsanti */
+/* Bottone aderisci */
 .btn-aderisci {
   background-color: #0a9396;
   color: white;
@@ -137,6 +293,7 @@ nav a:hover {
   background-color: #007d82;
 }
 
+/* Bottone rimuovi */
 .btn-rimuovi {
   background-color: rgba(220, 53, 69, 0.8);
   color: white;
@@ -152,74 +309,27 @@ nav a:hover {
   background-color: rgba(200, 30, 50, 0.9);
 }
 
-/* Barra di controllo fissa */
-.barra-controllo {
-  position: fixed;
-  justify-content: center;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #ffffff;
-  border-top: 1px solid #ccc;
-  padding: 0.7rem 1rem;
-  z-index: 1000;
-}
-
-.barra-controllo .bottoni-navigazione {
+/* Filtro turni incompleti */
+.filtro-turni {
   display: flex;
   justify-content: center;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.3rem;
+  margin: 1rem auto 0;
 }
 
-.barra-controllo button {
-  padding: 0.6rem 1.2rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  background-color: #0a9396;
-  color: white;
-  font-weight: bold;
-  flex: 1;
-  text-align: center;
-}
-
-.barra-controllo button:hover {
-  background-color: #007d82;
-}
-
-.barra-controllo #titoloSettimana {
-  text-align: center;
+.filtro-turni select {
+  padding: 0.4rem 0.8rem;
   font-size: 0.9rem;
-  font-weight: bold;
-  color: #555;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #198754;
-  color: white;
-  padding: 1rem 2rem;
   border-radius: 6px;
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 2000;
+  border: 1px solid #aaa;
+  background-color: #f9f9f9;
+  font-weight: bold;
+  color: #333;
+  cursor: pointer;
+  transition: background 0.2s ease;
 }
 
-.toast.show {
-  opacity: 1;
-}
-
-/* Responsive */
-@media (max-width: 600px) {
-  .barra-controllo .bottoni-navigazione {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+.filtro-turni select:focus {
+  outline: none;
+  border-color: #0a9396;
+  box-shadow: 0 0 0 2px rgba(10, 147, 150, 0.3);
 }
