@@ -139,7 +139,8 @@ function renderTurno(lista, dataISO, turno) {
   });
 
   if (!lista.includes(window.username) && lista.length < 3) {
-    html += `<button onclick="aderisciTurno('${dataISO}', '${turno}')" class="btn-aderisci">aderisci</button>`;
+    const label = lista.length === 1 ? "aderisci" : "aderisci come riserva";
+    html += `<button onclick="aderisciTurno('${dataISO}', '${turno}')" class="btn-aderisci">${label}</button>`;
   }
 
   return html;
