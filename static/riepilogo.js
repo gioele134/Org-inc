@@ -126,13 +126,12 @@ function renderTurno(lista, dataISO, turno) {
     const colorClass = index === 2 ? "blue" : index < 2 ? "green" : "grey";
     const ora = window.timestampMap?.[dataISO]?.[turno]?.[utente] || "";
     const orario = ora ? ` <small>${formatDateTime(ora)}</small>` : "";
-    html += `<span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}${orario}</span>`;
-
-    if (utente === window.username) {
-      html += `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>`;
-    }
-
-    html += " ";
+    html += `
+      <div class="riga-turno">
+        <span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}${orario}</span>
+        ${utente === window.username ? `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>` : ""}
+      </div>
+    `;
   });
 
   if (!lista.includes(window.username) && lista.length < 3) {
@@ -161,7 +160,7 @@ async function rimuoviTurno(data, turno) {
     const { data: aggiornata } = await supabase
       .from("disponibilita")
       .select("*")
-      .order("inserito_il", { ascending: true });
+      .order("created_at", { ascending: true });
     settimane = organizzaPerSettimane(aggiornata);
     aggiornaSettimana();
   }
@@ -178,7 +177,7 @@ async function aderisciTurno(data, turno) {
     const { data: aggiornata } = await supabase
       .from("disponibilita")
       .select("*")
-      .order("inserito_il", { ascending: true });
+      .order("created_at", { ascending: true });
     settimane = organizzaPerSettimane(aggiornata);
     aggiornaSettimana();
   }
@@ -190,7 +189,7 @@ function organizzaPerSettimane(disponibilita) {
   const timestamps = {};
 
   disponibilita.forEach(record => {
-    const { data, turno, utente, inserito_il } = record;
+    const { data, turno, utente, created_at } = record;
     const dataObj = new Date(data);
     const settimanaNum = getSettimana(dataObj);
 
@@ -215,7 +214,7 @@ function organizzaPerSettimane(disponibilita) {
 
     if (!timestamps[data]) timestamps[data] = {};
     if (!timestamps[data][turno]) timestamps[data][turno] = {};
-    timestamps[data][turno][utente] = inserito_il;
+    timestamps[data][turno][utente] = created_at;
   });
 
   window.timestampMap = timestamps;
