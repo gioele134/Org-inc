@@ -311,3 +311,47 @@ form.login-form button:hover {
 .btn-aderisci:hover {
   background-color: #007d82;
 }
+
+/* Select dropdown (menu a tendina) */
+select {
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #aaa;
+  border-radius: 6px;
+  background-color: #f0f0f0;
+  color: #333;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'%3E%3Cpath fill='%23000' d='M2 0L0 2h4L2 0zm0 5L0 3h4L2 5z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.7rem center;
+  background-size: 0.6rem;
+  max-width: 100%;
+}
+
+select:focus {
+  border-color: #0a9396;
+  outline: none;
+  background-color: #e6fcfc;
+}
+
+/* Container per filtro */
+.filtro-turni {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  margin: 1rem 0;
+}
+
+/* Responsive: adattamento per mobile */
+@media (max-width: 600px) {
+  .filtro-turni {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .filtro-turni select {
+    width: 100%;
+    font-size: 1rem;
+  }
+}
