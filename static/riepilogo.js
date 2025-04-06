@@ -17,7 +17,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const { data, error } = await supabase
     .from("disponibilita")
     .select("*")
-    .order("inserito_il", { ascending: true });
+    .order("created_at", { ascending: true });
 
   if (error || !data) {
     container.innerHTML = "<p>Errore nel caricamento dei dati.</p>";
