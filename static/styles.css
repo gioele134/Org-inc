@@ -355,28 +355,3 @@ form.login-form button:hover {
   cursor: not-allowed;
   font-weight: bold;
 }
-
-/* --- BADGE UTENTE PER TURNO --- */
-.turno-badge {
-  display: inline-block;
-  padding: 0.2rem 0.5rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  margin-right: 0.3rem;
-  background-color: #ddd;
-  color: #000;
-}
-
-.turno-badge .icon {
-  margin-right: 0.3rem;
-}
-
-.turno-badge.green {
-  background-color: #d0f0d0;
-  color: #1e7d1e;
-}
-
-.turno-badge.blue {
-  background-color: #cce0ff;
-  color: #004e9a;
-}
