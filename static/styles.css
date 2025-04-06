@@ -343,3 +343,8 @@ form.login-form button:hover {
   background-color: #ccc;
   cursor: not-allowed;
 }
+
+.turno-badge small {
+  font-size: 0.75rem;
+  color: #666;
+}
