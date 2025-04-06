@@ -149,15 +149,8 @@ form.login-form button:hover {
   display: flex;
   align-items: center;
   justify-content:center;
-}
-
-.barra-controllo .bottoni-navigazione {
-  display: flex;
-  align-items: center;
   gap: 1rem;
   margin-bottom: 0.3rem;
-  max-width: 420px;
-  width: 100%;
 }
 
 .barra-controllo button {
