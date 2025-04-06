@@ -1,4 +1,4 @@
-const giorniSettimana = ['DOM', 'LUN', 'MAR', 'MER', 'GIO', 'VEN', 'SAB'];
+const giorniSettimana = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
 let settimanaCorrente = 0;
 let selezionate = {};
 let confermate = {};
@@ -89,6 +89,27 @@ function aggiornaSettimana() {
       turniDiv.appendChild(conferma);
     } else if (!èFestivo) {
       ["M", "P"].forEach(turno => {
+        const giàTreAdesioni = (mappaDisponibilita[dataISO]?.[turno] || 0) >= 3;
+
+        // Caso 1 – Disabilitazione temporanea del turno M
+        if (turno === "M") {
+          const disabilitato = document.createElement("div");
+          disabilitato.classList.add("turno-disabilitato");
+          disabilitato.textContent = "Turno di mattina disabilitato";
+          turniDiv.appendChild(disabilitato);
+          return;
+        }
+
+        // Caso 2 – Turno completo
+        if (giàTreAdesioni) {
+          const completo = document.createElement("div");
+          completo.classList.add("turno-completo-label");
+          completo.textContent = turno === "M" ? "Turno di mattina al completo" : "Turno di pomeriggio al completo";
+          turniDiv.appendChild(completo);
+          return;
+        }
+
+        // Caso 3 – Turno selezionabile
         const btn = document.createElement("button");
         btn.classList.add("turno-btn");
         btn.textContent = turno;
@@ -141,7 +162,7 @@ function aggiornaSettimana() {
     griglia.appendChild(div);
   }
 
-  const domLabel = `DOMENICA ${String(domenica.getDate()).padStart(2, "0")}`;
+  const domLabel = `Domenica ${String(domenica.getDate()).padStart(2, "0")}`;
   const divDom = document.createElement("div");
   divDom.classList.add("domenica");
   divDom.textContent = domLabel;
