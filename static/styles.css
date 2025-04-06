@@ -68,7 +68,7 @@ form.login-form button:hover {
 }
 
 /* Contenitori principali */
-#griglia, .riepilogo .turno-completo {
+#griglia, .riepilogo {
   display: grid;
   gap: 0.5rem;
   padding: 1rem;
@@ -149,11 +149,11 @@ form.login-form button:hover {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content:center;
 }
 
 .barra-controllo .bottoni-navigazione {
   display: flex;
-  justify-content: center;
   align-items: center;
   gap: 1rem;
   margin-bottom: 0.3rem;
@@ -206,18 +206,6 @@ form.login-form button:hover {
   opacity: 1;
 }
 
-/* Responsive */
-@media (max-width: 600px) {
-  .turni {
-    display: flex;
-    justify-content: space-around;
-  }
-
-  .barra-controllo .bottoni-navigazione {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
-}
 
 /* Titolo settimana */
 #titoloSettimana {
