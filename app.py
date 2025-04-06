@@ -159,6 +159,34 @@ def riepilogo():
 
         settimane.append(settimana_data)
 
+@app.route("/aderisci_turno", methods=["POST"])
+def aderisci_turno():
+    if "username" not in session:
+        return "Non autorizzato", 403
+
+    username = session["username"]
+    data = request.json.get("data")
+    turno = request.json.get("turno")
+
+    if not data or not turno:
+        return "Dati mancanti", 400
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+
+    # Rimuovi eventuale disponibilità per quella data
+    cur.execute("DELETE FROM disponibilita WHERE utente=? AND data=?", (username, data))
+
+    # Inserisci la nuova disponibilità
+    cur.execute(
+        "INSERT INTO disponibilita (utente, data, turno) VALUES (?, ?, ?)",
+        (username, data, turno)
+    )
+
+    conn.commit()
+    conn.close()
+    return "", 204
+
     return render_template(
     "riepilogo.html",
     settimane=settimane,
