@@ -4,7 +4,6 @@ const supabase = window.supabase.createClient(window.SUPABASE_URL, window.SUPABA
 // --- VARIABILI GLOBALI ---
 let settimanaCorrente = 0;
 let settimane = [];
-let filtroAttivo = null; // "1" oppure "2" oppure null
 
 // --- DOM READY ---
 document.addEventListener("DOMContentLoaded", async () => {
@@ -26,6 +25,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document.getElementById("prevSettimana").addEventListener("click", () => cambiaSettimana(-1));
   document.getElementById("nextSettimana").addEventListener("click", () => cambiaSettimana(1));
+  document.getElementById("filtroIncompleti").addEventListener("change", aggiornaSettimana);
 });
 
 // --- CAMBIO SETTIMANA ---
@@ -48,44 +48,33 @@ function aggiornaSettimana() {
     return;
   }
 
-  document.getElementById("titoloSettimana").textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
+  // Titolo settimana
+  const titolo = document.createElement("h3");
+  titolo.id = "titoloSettimana";
+  titolo.textContent = `Settimana ${settimana.numero} — dal ${settimana.inizio} al ${settimana.fine}`;
+  contenitore.appendChild(titolo);
 
+  // Turni al completo
   const turniCompleti = [];
   const turniIncompleti = [];
 
   for (const giorno of Object.values(settimana.giorni)) {
     ["M", "P"].forEach(turno => {
       const lista = giorno[turno] || [];
-      if (lista.length === 0) return;
-
       const label = `${giorno.data.toLowerCase()} ${turno === "M" ? "mattina" : "pomeriggio"}`;
 
-      const turnoObj = {
-        label,
-        utenti: lista,
-        data: giorno.data_iso,
-        turno,
-        count: lista.length
-      };
-
       if (lista.length === 3) {
-        turniCompleti.push(turnoObj);
-      } else {
-        turniIncompleti.push(turnoObj);
+        turniCompleti.push({ label, utenti: lista, data: giorno.data_iso, turno });
+      } else if (lista.length > 0) {
+        turniIncompleti.push({ label, utenti: lista, data: giorno.data_iso, turno });
       }
     });
   }
 
-  // Titolo settimana
-  const titoloSett = document.createElement("h3");
-  titoloSett.textContent = `Settimana ${settimana.numero}`;
-  contenitore.appendChild(titoloSett);
-
-  // Turni completi
   if (turniCompleti.length > 0) {
-    const titolo = document.createElement("h3");
-    titolo.textContent = "Turni al completo";
-    contenitore.appendChild(titolo);
+    const titoloCompleti = document.createElement("h4");
+    titoloCompleti.textContent = "Turni al completo";
+    contenitore.appendChild(titoloCompleti);
 
     turniCompleti.forEach(turno => {
       const div = document.createElement("div");
@@ -98,35 +87,28 @@ function aggiornaSettimana() {
     });
   }
 
-  // Turni incompleti con filtro
-  if (turniIncompleti.length > 0) {
-    const titolo = document.createElement("h3");
-    titolo.textContent = "Turni incompleti";
-    contenitore.appendChild(titolo);
+  // Turni incompleti
+  const filtro = document.getElementById("filtroIncompleti").value;
+  const daMostrare = turniIncompleti.filter(turno =>
+    filtro === "tutti" ||
+    (filtro === "uno" && turno.utenti.length === 1) ||
+    (filtro === "due" && turno.utenti.length === 2)
+  );
 
-    turniIncompleti
-      .filter(t => filtroAttivo === null || String(t.count) === filtroAttivo)
-      .forEach(turno => {
-        const div = document.createElement("div");
-        div.classList.add("giorno-riepilogo");
-        div.innerHTML = `
-          <strong>${turno.label}</strong>
-          <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
-        `;
-        contenitore.appendChild(div);
-      });
+  if (daMostrare.length > 0) {
+    const titoloIncompleti = document.createElement("h4");
+    titoloIncompleti.textContent = "Turni incompleti";
+    contenitore.appendChild(titoloIncompleti);
 
-    // Pulsanti filtro
-    const filtriDiv = document.createElement("div");
-    filtriDiv.classList.add("filtro-turni");
-
-    filtriDiv.innerHTML = `
-      <button onclick="applicaFiltro('1')" ${filtroAttivo === '1' ? 'disabled' : ''}>Turni con 1 adesione</button>
-      <button onclick="applicaFiltro('2')" ${filtroAttivo === '2' ? 'disabled' : ''}>Turni con 2 adesioni</button>
-      <button onclick="applicaFiltro(null)" ${filtroAttivo === null ? 'disabled' : ''}>Tutti</button>
-    `;
-
-    contenitore.appendChild(filtriDiv);
+    daMostrare.forEach(turno => {
+      const div = document.createElement("div");
+      div.classList.add("giorno-riepilogo");
+      div.innerHTML = `
+        <strong>${turno.label}</strong>
+        <div>${renderTurno(turno.utenti, turno.data, turno.turno)}</div>
+      `;
+      contenitore.appendChild(div);
+    });
   }
 }
 
@@ -139,17 +121,14 @@ function renderTurno(lista, dataISO, turno) {
     html += `<span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}</span>`;
 
     if (utente === window.username) {
-      html += `
-        <button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>
-      `;
+      html += `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>`;
     }
+
     html += " ";
   });
 
   if (!lista.includes(window.username) && lista.length < 3) {
-    html += `
-      <button onclick="aderisciTurno('${dataISO}', '${turno}')" class="btn-aderisci">aderisci</button>
-    `;
+    html += `<button onclick="aderisciTurno('${dataISO}', '${turno}')" class="btn-aderisci">aderisci</button>`;
   }
 
   return html;
@@ -184,12 +163,6 @@ async function aderisciTurno(data, turno) {
     settimane = organizzaPerSettimane(aggiornata);
     aggiornaSettimana();
   }
-}
-
-// --- FILTRO ---
-function applicaFiltro(valore) {
-  filtroAttivo = valore;
-  aggiornaSettimana();
 }
 
 // --- ORGANIZZAZIONE DATI ---
