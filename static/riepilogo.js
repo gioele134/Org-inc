@@ -129,7 +129,7 @@ function renderTurno(lista, dataISO, turno) {
     html += `
       <div class="riga-turno">
         <span class="turno-badge ${colorClass}"><span class="icon">●</span> ${utente}${orario}</span>
-        ${utente === window.username ? `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">✖</button>` : ""}
+        ${utente === window.username ? `<button onclick="rimuoviTurno('${dataISO}', '${turno}')" class="btn-rimuovi">Rimuovi la tua disponibilità</button>` : ""}
       </div>
     `;
   });
