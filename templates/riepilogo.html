@@ -5,8 +5,6 @@
   <title>Riepilogo Disponibilità</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  
-  <!-- Supabase Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
@@ -20,26 +18,48 @@
     </nav>
   </header>
 
-  <main>
-    <div id="settimaneContainer" class="riepilogo"></div>
+  <main role="main">
+    <!-- Turni al completo -->
+    <section id="turniCompleti" class="riepilogo">
+      <h3>Turni al completo</h3>
+      <!-- Popolata da JS -->
+    </section>
+
+    <!-- Filtro turni parziali -->
+    <section class="riepilogo">
+      <h3>Turni parziali</h3>
+      <label for="filtroParziali">Visualizza:</label>
+      <select id="filtroParziali">
+        <option value="2">Turni con 2 adesioni</option>
+        <option value="1">Turni con 1 adesione</option>
+      </select>
+      <div id="turniParziali"></div>
+    </section>
+
+    <!-- Riepilogo generale settimanale -->
+    <section class="riepilogo">
+      <h3 id="titoloSettimana"></h3>
+      <div id="settimaneContainer"></div>
+    </section>
   </main>
 
+  <!-- Barra di controllo -->
   <div class="barra-controllo">
     <button id="prevSettimana">← Settimana precedente</button>
-    <span id="titoloSettimana"></span>
     <button id="nextSettimana">Settimana successiva →</button>
   </div>
 
-  <div id="toast" class="toast">Turno rimosso</div>
+  <!-- Toast -->
+  <div id="toast" class="toast">Turno aggiornato</div>
 
-  <!-- Chiavi e inizializzazione -->
+  <!-- Variabili JS globali -->
   <script>
     window.SUPABASE_URL = "{{ supabase_url }}";
     window.SUPABASE_KEY = "{{ supabase_key }}";
     window.username = "{{ username }}";
   </script>
 
-  <!-- Script custom -->
+  <!-- JS -->
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
