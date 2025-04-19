@@ -9,10 +9,7 @@ body {
   font-family: "Segoe UI", sans-serif;
   background-color: #f4f4f4;
   color: #333;
-  min-height: 100vh;
-  margin: 0.5rem;
-  padding: 0.5rem;
-  padding-bottom: 100px; /* spazio per barra fissa */
+  padding-bottom: 100px;
 }
 
 /* Header */
@@ -38,156 +35,17 @@ nav a:hover {
   text-decoration: underline;
 }
 
-/* Contenitore calendario / riepilogo */
-#griglia,
-#settimaneContainer,
+/* Riepilogo container */
 .riepilogo {
   max-width: 420px;
-  margin: 2rem auto;
+  margin: 1.5rem auto;
   padding: 1rem;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-  display: grid;
-  gap: 0.6rem;
 }
 
-/* Giorno calendario */
-.giorno {
-  background: white;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  padding: 0.8rem;
-}
-
-.domenica {
-  background: #ffcccc;
-  padding: 0.8rem;
-  text-align: center;
-  font-weight: bold;
-  border-radius: 8px;
-}
-
-.etichetta {
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-}
-
-/* Turni */
-.turni {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
-}
-
-.turno-btn {
-  flex: 1;
-  padding: 0.5rem;
-  font-size: 1rem;
-  border-radius: 6px;
-  border: 1px solid #888;
-  background: #eee;
-  cursor: pointer;
-}
-
-.turno-btn:hover:not(:disabled) {
-  background-color: #ddd;
-}
-
-.turno-btn.selezionato {
-  background-color: rgba(0, 128, 0, 0.8) !important;
-  color: #fff !important;
-  border: 2px solid #006400;
-  font-weight: bold;
-}
-
-/* Conteggio */
-.conteggio {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-/* Turno completo */
-.turno-completo-label {
-  font-size: 0.85rem;
-  color: #888;
-  font-style: italic;
-  margin-top: 0.4rem;
-}
-
-/* Etichetta festivo */
-.festivo-label {
-  color: #b40000;
-  font-weight: bold;
-  font-size: 0.85rem;
-  margin-bottom: 0.3rem;
-}
-
-/* Barra di controllo in basso */
-.barra-controllo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.6rem 0.5rem;
-  background-color: white;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  border-top: 1px solid #ccc;
-  z-index: 999;
-}
-
-.barra-controllo .bottoni {
-  display: flex;
-  gap: 0.6rem;
-  justify-content: center;
-}
-
-.barra-controllo button {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
-  background-color: #0077cc;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.barra-controllo button:hover {
-  background-color: #005fa3;
-}
-
-#titoloSettimana {
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: bold;
-  color: #555;
-}
-
-/* Toast */
-.toast {
-  position: fixed;
-  bottom: 80px;
-  left: 50%;
-  transform: translateX(-50%);
-  background-color: #198754;
-  color: white;
-  padding: 1rem 2rem;
-  border-radius: 6px;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s ease;
-  z-index: 2000;
-}
-
-.toast.show {
-  opacity: 1;
-  visibility: visible;
-}
-
-/* Riepilogo giorni */
+/* Giorno nel riepilogo */
 .giorno-riepilogo {
   padding: 0.6rem 0.8rem;
   border: 1px solid #ddd;
@@ -208,23 +66,120 @@ nav a:hover {
   font-size: 0.9rem;
   margin: 0.2rem 0;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
-/* Bottone rimuovi turno */
+/* Sezione turni completi */
+#turni-completi {
+  max-width: 420px;
+  margin: 2rem auto 1rem;
+  padding: 1rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+#turni-completi h2 {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+  color: #333;
+  text-align: center;
+}
+
+/* Badge utente */
+.turno-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  border: 1px solid #bbb;
+  background-color: #eee;
+  color: #333;
+}
+
+.turno-badge.green {
+  background-color: rgba(0, 128, 0, 0.1);
+  color: green;
+  border-color: green;
+}
+
+.turno-badge.blue {
+  background-color: rgba(0, 0, 255, 0.1);
+  color: #0040ff;
+  border-color: #0040ff;
+}
+
+/* Bottone rimuovi */
 .btn-rimuovi {
   background-color: rgba(220, 53, 69, 0.8);
   color: white;
   border: none;
   border-radius: 4px;
-  padding: 0.2rem 0.4rem;
+  padding: 0.2rem 0.5rem;
   font-size: 0.85rem;
   cursor: pointer;
   font-weight: bold;
-  margin-left: 0.4rem;
 }
 
 .btn-rimuovi:hover {
   background-color: rgba(200, 30, 50, 0.9);
+}
+
+/* Barra di controllo */
+.barra-controllo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 0.5rem;
+  background-color: white;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #ccc;
+  z-index: 999;
+}
+
+.barra-controllo button {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.9rem;
+  background-color: #0077cc;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.barra-controllo button:hover {
+  background-color: #007d82;
+}
+
+#titoloSettimana {
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #555;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #198754;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 6px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2000;
+}
+
+.toast.show {
+  opacity: 1;
 }
