@@ -2,18 +2,18 @@
 * {
   box-sizing: border-box;
   margin: 0;
-  padding: 0
+  padding: 0;
 }
 
 body {
-  justify-content:center;
+  justify-content: center;
   font-family: "Segoe UI", sans-serif;
   background-color: #f4f4f4;
   color: #333;
   min-height: 100vh;
   margin: 0.5rem;
   padding: 0.5rem;
-  padding-bottom: 100px; /* spazio per barra fissa */
+  padding-bottom: 100px;
 }
 
 /* Header */
@@ -133,6 +133,25 @@ form.login-form button:hover {
   font-weight: bold;
 }
 
+/* Etichetta turno al completo */
+.turno-completo-label {
+  background-color: rgba(255, 165, 0, 0.1);
+  color: #b65e00;
+  font-weight: bold;
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+
+/* Etichetta festivo */
+.festivo-label {
+  color: #b40000;
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 0.3rem;
+}
+
 /* Conteggio disponibilità */
 .conteggio {
   font-size: 0.9rem;
@@ -170,6 +189,7 @@ form.login-form button:hover {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
 
 .barra-controllo button:hover {
   background-color: #007d82;
@@ -195,12 +215,13 @@ form.login-form button:hover {
   opacity: 0;
   transition: opacity 0.3s ease;
   z-index: 2000;
+  visibility: hidden;
 }
 
 .toast.show {
   opacity: 1;
+  visibility: visible;
 }
-
 
 /* Titolo settimana */
 #titoloSettimana {
@@ -218,12 +239,6 @@ form.login-form button:hover {
   border-radius: 6px;
   margin-bottom: 0.8rem;
   background-color: #f9f9f9;
-}
-
-/* Turni completi */
-.turno-completo {
-  background-color: #e6f0ff;
-  border-left: 5px solid #0077cc;
 }
 
 /* Etichetta del giorno */
