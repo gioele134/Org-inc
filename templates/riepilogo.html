@@ -20,29 +20,36 @@
   
   <main>
     <div id="turni-ricevuti">
+      <!-- Sezione opzionale per turni al completo -->
       <section id="turni-completi">
-    <h2>Turni al Completo</h2>
-    <!-- Popolato dinamicamente da JS -->
-    </section>
-    <div id="settimaneContainer" class="riepilogo"></div>
+        <!-- Popolato dinamicamente da JS se serve -->
+      </section>
+
+      <!-- Contenitore del riepilogo settimanale -->
+      <div id="settimaneContainer" class="riepilogo"></div>
     </div>
   </main>
 
-  <div class="barra-controllo bottoni">
-    <button id="prevSettimana">←</button>
+  <!-- Navigazione settimana -->
+  <div class="barra-controllo">
+    <div class="bottoni">
+      <button id="prevSettimana">←</button>
+      <button id="nextSettimana">→</button>
+    </div>
     <span id="titoloSettimana"></span>
-    <button id="nextSettimana">→</button>
   </div>
 
-
+  <!-- Toast di conferma -->
   <div id="toast" class="toast">Turno rimosso</div>
 
+  <!-- Chiavi Supabase -->
   <script>
     window.SUPABASE_URL = "{{ supabase_url }}";
     window.SUPABASE_KEY = "{{ supabase_key }}";
     window.username = "{{ username }}";
   </script>
 
+  <!-- Script principale -->
   <script src="{{ url_for('static', filename='riepilogo.js') }}"></script>
 </body>
 </html>
