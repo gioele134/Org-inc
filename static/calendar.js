@@ -22,17 +22,6 @@ async function caricaDati() {
   mappaDisponibilita = dati.tutte || {};
 }
 
-async function caricaFestivi() {
-  try {
-    const anno = new Date().getFullYear();
-    const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${anno}/IT`);
-    const json = await res.json();
-    giorniFestivi = json.map(f => f.date);
-  } catch {
-    giorniFestivi = [];
-  }
-}
-
 function cambiaSettimana(differenza) {
   const nuova = settimanaCorrente + differenza;
   if (nuova >= 0 && nuova < 5) {
@@ -57,7 +46,10 @@ function aggiornaSettimana() {
   const domenica = new Date(lunedi);
   domenica.setDate(domenica.getDate() + 6);
 
-  document.getElementById("titoloSettimana").textContent = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
+  const titolo = document.getElementById("titoloSettimana");
+  if (titolo) {
+    titolo.textContent = `${formattaDataBreve(lunedi)} – ${formattaDataBreve(domenica)}`;
+  }
 
   for (let i = 0; i < 6; i++) {
     const giorno = new Date(lunedi);
@@ -77,7 +69,10 @@ function aggiornaSettimana() {
     if (èFestivo) {
       const festivoTag = document.createElement("div");
       festivoTag.textContent = "FESTIVO";
-      festivoTag.classList.add("festivo-label");
+      festivoTag.style.color = "#b40000";
+      festivoTag.style.fontWeight = "bold";
+      festivoTag.style.fontSize = "0.85rem";
+      festivoTag.style.marginBottom = "0.3rem";
       div.appendChild(festivoTag);
     }
 
@@ -85,11 +80,12 @@ function aggiornaSettimana() {
     turniDiv.classList.add("turni");
 
     const turnoConfermato = confermate[dataISO];
-
     if (turnoConfermato) {
       const conferma = document.createElement("div");
       conferma.classList.add("turno-confermato");
       conferma.textContent = `${turnoConfermato} ✔`;
+      conferma.style.color = "green";
+      conferma.style.fontWeight = "bold";
       turniDiv.appendChild(conferma);
     } else if (!èFestivo) {
       ["M", "P"].forEach(turno => {
@@ -98,9 +94,7 @@ function aggiornaSettimana() {
         if (giàTreAdesioni) {
           const completo = document.createElement("div");
           completo.classList.add("turno-completo-label");
-          completo.textContent = turno === "M"
-            ? "Turno di mattina al completo"
-            : "Turno di pomeriggio al completo";
+          completo.textContent = turno === "M" ? "Turno di mattina al completo" : "Turno di pomeriggio al completo";
           turniDiv.appendChild(completo);
           return;
         }
@@ -121,24 +115,26 @@ function aggiornaSettimana() {
           btn.classList.add("selezionato");
         }
 
-        btn.addEventListener("click", () => {
-          if (selezionate[dataISO] === turno) {
-            delete selezionate[dataISO];
-          } else {
-            selezionate[dataISO] = turno;
-          }
+        if (!èConfermato) {
+          btn.addEventListener("click", () => {
+            if (selezionate[dataISO] === turno) {
+              delete selezionate[dataISO];
+            } else {
+              selezionate[dataISO] = turno;
+            }
 
-          turniDiv.querySelectorAll(".turno-btn").forEach(b => b.classList.remove("selezionato"));
-          if (selezionate[dataISO]) {
-            turniDiv.querySelectorAll(".turno-btn").forEach(b => {
-              if (b.textContent === selezionate[dataISO]) {
-                b.classList.add("selezionato");
-              }
-            });
-          }
+            turniDiv.querySelectorAll(".turno-btn").forEach(b => b.classList.remove("selezionato"));
+            if (selezionate[dataISO]) {
+              turniDiv.querySelectorAll(".turno-btn").forEach(b => {
+                if (b.textContent === selezionate[dataISO]) {
+                  b.classList.add("selezionato");
+                }
+              });
+            }
 
-          aggiornaContatore();
-        });
+            aggiornaContatore();
+          });
+        }
 
         turniDiv.appendChild(btn);
       });
@@ -155,7 +151,6 @@ function aggiornaSettimana() {
     griglia.appendChild(div);
   }
 
-  // DOMENICA (solo etichetta visiva)
   const domLabel = `Domenica ${String(domenica.getDate()).padStart(2, "0")}`;
   const divDom = document.createElement("div");
   divDom.classList.add("domenica");
@@ -202,4 +197,15 @@ function mostraToast(msg) {
 
 function formattaDataBreve(data) {
   return `${String(data.getDate()).padStart(2, "0")} ${data.toLocaleString("it-IT", { month: "short" })}`;
+}
+
+async function caricaFestivi() {
+  try {
+    const anno = new Date().getFullYear();
+    const res = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${anno}/IT`);
+    const json = await res.json();
+    giorniFestivi = json.map(f => f.date);
+  } catch (e) {
+    giorniFestivi = [];
+  }
 }
