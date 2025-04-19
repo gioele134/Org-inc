@@ -18,6 +18,7 @@ UTENTI = {
     "admin": "adminpass",
     "ciao": "ciao",
     "1234": "gioele"
+    "rossella": "1234"
 }
 
 # --- Login ---
