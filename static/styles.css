@@ -6,14 +6,13 @@
 }
 
 body {
-  justify-content: center;
   font-family: "Segoe UI", sans-serif;
   background-color: #f4f4f4;
   color: #333;
   min-height: 100vh;
   margin: 0.5rem;
   padding: 0.5rem;
-  padding-bottom: 100px;
+  padding-bottom: 100px; /* spazio per barra fissa */
 }
 
 /* Header */
@@ -26,7 +25,6 @@ header {
 
 header h2 {
   margin-bottom: 0.5rem;
-  justify-content: center;
 }
 
 nav a {
@@ -40,58 +38,26 @@ nav a:hover {
   text-decoration: underline;
 }
 
-/* Login */
-form.login-form {
-  max-width: 320px;
-  margin: 4rem auto;
-  padding: 2rem;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 0 10px #ccc;
-}
-
-form.login-form input,
-form.login-form button {
-  width: 100%;
-  margin-top: 1rem;
-  padding: 0.8rem;
-  font-size: 1rem;
-}
-
-form.login-form button {
-  background-color: #0a9396;
-  color: white;
-  border: none;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-form.login-form button:hover {
-  background-color: #007d82;
-}
-
-/* Contenitori principali */
-#griglia, .riepilogo .turni-ricevuti {
-  display: grid;
-  gap: 0.5rem;
-  padding: 1rem;
+/* Contenitore calendario / riepilogo */
+#griglia,
+#settimaneContainer,
+.riepilogo {
   max-width: 420px;
   margin: 2rem auto;
+  padding: 1rem;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+  display: grid;
+  gap: 0.6rem;
 }
 
-/* Giorni del calendario */
+/* Giorno calendario */
 .giorno {
   background: white;
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 0.8rem;
-}
-
-.giorno.festivo {
-  background-color: #ffe5e5;
 }
 
 .domenica {
@@ -109,12 +75,14 @@ form.login-form button:hover {
 
 /* Turni */
 .turni {
-  margin-bottom: 0.5rem;
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .turno-btn {
-  margin-right: 0.5rem;
-  padding: 0.5rem 1rem;
+  flex: 1;
+  padding: 0.5rem;
   font-size: 1rem;
   border-radius: 6px;
   border: 1px solid #888;
@@ -133,15 +101,18 @@ form.login-form button:hover {
   font-weight: bold;
 }
 
-/* Etichetta turno al completo */
+/* Conteggio */
+.conteggio {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+/* Turno completo */
 .turno-completo-label {
-  background-color: rgba(255, 165, 0, 0.1);
-  color: #b65e00;
-  font-weight: bold;
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
   font-size: 0.85rem;
-  margin-bottom: 0.3rem;
+  color: #888;
+  font-style: italic;
+  margin-top: 0.4rem;
 }
 
 /* Etichetta festivo */
@@ -152,20 +123,13 @@ form.login-form button:hover {
   margin-bottom: 0.3rem;
 }
 
-/* Conteggio disponibilità */
-.conteggio {
-  font-size: 0.9rem;
-  color: #666;
-}
-
-/* Barra di controllo fissa */
+/* Barra di controllo in basso */
 .barra-controllo {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  padding: 1rem 0.5rem;
+  gap: 0.4rem;
+  padding: 0.6rem 0.5rem;
   background-color: white;
   position: fixed;
   bottom: 0;
@@ -178,7 +142,7 @@ form.login-form button:hover {
 .barra-controllo .bottoni {
   display: flex;
   gap: 0.6rem;
-  flex-wrap: nowrap;
+  justify-content: center;
 }
 
 .barra-controllo button {
@@ -192,10 +156,10 @@ form.login-form button:hover {
 }
 
 .barra-controllo button:hover {
-  background-color: #007d82;
+  background-color: #005fa3;
 }
 
-.barra-controllo #titoloSettimana {
+#titoloSettimana {
   text-align: center;
   font-size: 0.9rem;
   font-weight: bold;
@@ -213,9 +177,9 @@ form.login-form button:hover {
   padding: 1rem 2rem;
   border-radius: 6px;
   opacity: 0;
+  visibility: hidden;
   transition: opacity 0.3s ease;
   z-index: 2000;
-  visibility: hidden;
 }
 
 .toast.show {
@@ -223,16 +187,7 @@ form.login-form button:hover {
   visibility: visible;
 }
 
-/* Titolo settimana */
-#titoloSettimana {
-  font-size: 1rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 1rem;
-  color: #0077cc;
-}
-
-/* Giorni nel riepilogo */
+/* Riepilogo giorni */
 .giorno-riepilogo {
   padding: 0.6rem 0.8rem;
   border: 1px solid #ddd;
@@ -241,7 +196,6 @@ form.login-form button:hover {
   background-color: #f9f9f9;
 }
 
-/* Etichetta del giorno */
 .giorno-riepilogo strong {
   display: block;
   font-size: 0.95rem;
@@ -250,7 +204,6 @@ form.login-form button:hover {
   margin-bottom: 0.4rem;
 }
 
-/* Dettagli turni */
 .giorno-riepilogo div {
   font-size: 0.9rem;
   margin: 0.2rem 0;
@@ -259,67 +212,7 @@ form.login-form button:hover {
   gap: 6px;
 }
 
-/* Badge utente */
-.turno-badge {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.8rem;
-  padding: 0.3rem 0.6rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  border: 1px solid #bbb;
-  background-color: #eee;
-  color: #333;
-}
-
-.turno-badge.green {
-  background-color: rgba(0, 128, 0, 0.1);
-  color: green;
-  border-color: green;
-}
-
-.turno-badge.blue {
-  background-color: rgba(0, 0, 255, 0.1);
-  color: #0040ff;
-  border-color: #0040ff;
-}
-
-.turno-badge.grey {
-  background-color: #eee;
-  color: #333;
-  border-color: #bbb;
-}
-
-.turno-badge .icon {
-  font-size: 0.7rem;
-  font-weight: bold;
-  padding: 2px 6px;
-  border-radius: 8px;
-  background-color: currentColor;
-  color: white;
-  text-transform: uppercase;
-  line-height: 1;
-}
-
-/* Bottone aderisci */
-.btn-aderisci {
-  background-color: #0a9396;
-  color: white;
-  border: none;
-  border-radius: 20px;
-  padding: 0.3rem 0.8rem;
-  font-size: 0.8rem;
-  cursor: pointer;
-  margin-left: 0.6rem;
-}
-
-.btn-aderisci:hover {
-  background-color: #007d82;
-}
-
-/* Bottone rimuovi */
+/* Bottone rimuovi turno */
 .btn-rimuovi {
   background-color: rgba(220, 53, 69, 0.8);
   color: white;
@@ -329,44 +222,9 @@ form.login-form button:hover {
   font-size: 0.85rem;
   cursor: pointer;
   font-weight: bold;
+  margin-left: 0.4rem;
 }
 
 .btn-rimuovi:hover {
   background-color: rgba(200, 30, 50, 0.9);
-}
-
-/* Filtro turni incompleti */
-.filtro-turni {
-  display: flex;
-  justify-content: center;
-  margin: 1rem auto 0;
-}
-
-.filtro-turni select {
-  padding: 0.4rem 0.8rem;
-  font-size: 0.9rem;
-  border-radius: 6px;
-  border: 1px solid #aaa;
-  background-color: #f9f9f9;
-  font-weight: bold;
-  color: #333;
-  cursor: pointer;
-  transition: background 0.2s ease;
-}
-
-.filtro-turni select:focus {
-  outline: none;
-  border-color: #0a9396;
-  box-shadow: 0 0 0 2px rgba(10, 147, 150, 0.3);
-}
-
-/* Contenitore del riepilogo (coerente con il calendario) */
-#settimaneContainer,
-.riepilogo {
-  max-width: 420px;
-  margin: 2rem auto;
-  padding: 1rem;
-  background-color: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
 }
